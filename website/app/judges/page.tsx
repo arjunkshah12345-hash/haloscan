@@ -33,7 +33,9 @@ export default function JudgesPage() {
             Clone the repository and run <code>python3 tests/smoke_test.py</code> — all checks should pass.
           </li>
           <li>
-            Review <Link href="/architecture">architecture</Link>,{" "}
+            Review <Link href="/gallery">figure gallery</Link>,{" "}
+            <Link href="/methodology">methodology</Link>,{" "}
+            <Link href="/architecture">architecture</Link>,{" "}
             <Link href="/validation">validation figures</Link>, and{" "}
             <Link href="/use-cases">clinical use cases</Link> on the site; README.md and TECHNICAL.md on GitHub.
           </li>
@@ -63,6 +65,35 @@ export default function JudgesPage() {
           Automated smoke tests. Open-source MIT license. Battery sensitivity exceeds the published Emory 2020
           machine-learning baseline on synthetic holdout data.
         </p>
+      </section>
+
+      <section>
+        <h2>3. Site Map for Judges</h2>
+        <table className="data">
+          <thead>
+            <tr>
+              <th>Page</th>
+              <th>What to verify</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              ["/scan", "Live PyTorch inference, keys 1–4, Grad-CAM + radial charts"],
+              ["/gallery", "All 16+ exported figure panels with inference metrics"],
+              ["/validation", "Benchmark chart, confusion matrix, 5/5 smoke tests"],
+              ["/methodology", "Synthetic training data, radial profiles, decision flow"],
+              ["/architecture", "SVG pipeline diagram, API routes, deployment"],
+              ["/use-cases", "Four clinical vignettes with real model outputs"],
+            ].map(([href, desc]) => (
+              <tr key={href}>
+                <td>
+                  <Link href={href}>{href}</Link>
+                </td>
+                <td>{desc}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </section>
 
       <section>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { CaseFigure, CompareRow } from "@/components/CaseFigure";
 import { ArchitectureDiagram } from "@/components/ArchitectureDiagram";
+import { TimelineDiagram } from "@/components/TimelineDiagram";
 import { Nav } from "@/components/Nav";
 
 export default function HomePage() {
@@ -83,6 +84,9 @@ export default function HomePage() {
           &ldquo;On X-ray, they look the same. Stacked coins fake the halo. Rural hospitals don&apos;t have
           pediatric radiology at 2 AM. That is the gap Haloscan is built to close.&rdquo;
         </div>
+
+        <h3>Timeline</h3>
+        <TimelineDiagram />
       </section>
 
       <section>
@@ -230,8 +234,17 @@ export default function HomePage() {
         caption="Single coin without halo mimicry. The ensemble correctly assigns high coin probability (83%) and a ROUTINE protocol. Grad-CAM attention remains localized to the disc region; radial profile lacks the dual-peak structure characteristic of a true battery halo."
       />
 
+      <CaseFigure
+        caseId="normal"
+        figure="Figure 10"
+        title="Negative control — normal pediatric chest radiograph"
+        verdict="Low battery probability"
+        urgency="ROUTINE"
+        caption="No foreign body. The ensemble assigns low battery probability and ROUTINE protocol, demonstrating that Haloscan does not indiscriminately flag every study as an emergency. See the full four-case gallery for all exported panels."
+      />
+
       <section>
-        <h2>5. Clinical Output</h2>
+        <h2>6. Clinical Output</h2>
         <p>
           Every analysis returns more than a label. Clinicians receive probability bars for battery vs. coin,
           an ensemble decomposition (computer vision vs. neural network vs. fused), three explainability images,
@@ -257,7 +270,7 @@ export default function HomePage() {
       </section>
 
       <section>
-        <h2>6. Clinical Use Cases</h2>
+        <h2>7. Clinical Use Cases</h2>
         <p>
           Four vignettes—urban ER, rural single-view, tele-radiology false halo, and negative screen—map directly
           to scanner cases 1–4. Each includes real exported figures from the inference pipeline.
@@ -270,7 +283,40 @@ export default function HomePage() {
       </section>
 
       <section>
-        <h2>7. Try the Live System</h2>
+        <h2>8. Methodology &amp; Training Data</h2>
+        <p>
+          Haloscan trains on procedurally generated pediatric radiographs—no PHI, fully reproducible. The CV
+          branch radial profiles distinguish batteries from coins; DualViewNet learns dual-view fusion with
+          battery-weighted loss. See class samples, radial comparison charts, and the training pipeline.
+        </p>
+        <figure className="research-figure">
+          <Image
+            src="/figures/methodology/radial_comparison.png"
+            alt="Radial profile comparison across classes"
+            width={700}
+            height={420}
+            className="figure-img"
+            unoptimized
+            style={{ width: "100%", height: "auto", border: "1px solid #ccc" }}
+          />
+          <p className="figure-caption">
+            <strong>Figure 7.</strong> Radial intensity profiles — the physics-based signal the CV branch uses
+            before neural fusion.{" "}
+            <Link href="/methodology">Full methodology →</Link>
+          </p>
+        </figure>
+        <div className="cta-row">
+          <Link href="/methodology" className="btn btn-ghost">
+            Methodology &amp; Training →
+          </Link>
+          <Link href="/gallery" className="btn btn-ghost">
+            Complete Figure Gallery →
+          </Link>
+        </div>
+      </section>
+
+      <section>
+        <h2>9. Try the Live System</h2>
         <p>
           The clinical scanner runs real PyTorch inference on a cloud-hosted API. Upload your own radiograph, or
           press keys <strong>1–4</strong> to load reference cases identical to the figures above.
@@ -291,8 +337,20 @@ export default function HomePage() {
       </section>
 
       <section>
-        <h2>8. References &amp; Resources</h2>
+        <h2>10. References &amp; Resources</h2>
         <ul className="list">
+          <li>
+            <Link href="/gallery" className="row-link">
+              <span>Complete figure gallery (all 4 cases, 16+ panels)</span>
+              <span>→</span>
+            </Link>
+          </li>
+          <li>
+            <Link href="/methodology" className="row-link">
+              <span>Methodology — synthetic data, training, decision flow</span>
+              <span>→</span>
+            </Link>
+          </li>
           <li>
             <Link href="/architecture" className="row-link">
               <span>System architecture &amp; API reference</span>

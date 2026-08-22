@@ -1,0 +1,40 @@
+{
+  "classes": [
+    {
+      "label": "Button battery",
+      "note": "Double halo on AP"
+    },
+    {
+      "label": "Single coin",
+      "note": "Homogeneous disc"
+    },
+    {
+      "label": "Stacked coins",
+      "note": "False halo mimic"
+    },
+    {
+      "label": "Normal study",
+      "note": "No foreign body"
+    }
+  ],
+  "radial": {
+    "profiles": [
+      {
+        "class": "Battery",
+        "halo_score": 0.017,
+        "battery_score": 0.013
+      },
+      {
+        "class": "Coin",
+        "halo_score": 0.389,
+        "battery_score": 0.312
+      },
+      {
+        "class": "Stacked coins",
+        "halo_score": 0.811,
+        "battery_score": 0.648
+      }
+    ]
+  },
+  "export_script": "scripts/export_methodology_figures.py"
+}

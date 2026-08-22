@@ -3,7 +3,16 @@ import Link from "next/link";
 export function Nav({
   current,
 }: {
-  current?: "home" | "demo" | "judges" | "docs" | "architecture" | "usecases" | "validation";
+  current?:
+    | "home"
+    | "demo"
+    | "judges"
+    | "docs"
+    | "architecture"
+    | "usecases"
+    | "validation"
+    | "methodology"
+    | "gallery";
 }) {
   return (
     <nav>
@@ -14,8 +23,14 @@ export function Nav({
         <Link href="/scan" aria-current={current === "demo" ? "page" : undefined}>
           Scanner
         </Link>
+        <Link href="/gallery" aria-current={current === "gallery" ? "page" : undefined}>
+          Gallery
+        </Link>
         <Link href="/use-cases" aria-current={current === "usecases" ? "page" : undefined}>
           Use Cases
+        </Link>
+        <Link href="/methodology" aria-current={current === "methodology" ? "page" : undefined}>
+          Methodology
         </Link>
         <Link href="/architecture" aria-current={current === "architecture" ? "page" : undefined}>
           Architecture

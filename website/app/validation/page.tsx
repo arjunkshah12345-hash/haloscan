@@ -84,7 +84,30 @@ python3 -m haloscan.evaluate --n 40    # regenerate metrics.json`}</pre>
       </section>
 
       <section>
-        <h2>2. Benchmark Results</h2>
+        <h2>2. Radial Profiling Validation</h2>
+        <p>
+          The CV branch&apos;s radial intensity profiles separate battery halos from coin discs on synthetic
+          holdout. Stacked coins occupy an ambiguous zone—validating the conservative emergency policy.
+        </p>
+        <figure className="research-figure">
+          <Image
+            src="/figures/methodology/radial_comparison.png"
+            alt="Radial profile comparison"
+            width={700}
+            height={420}
+            className="figure-img"
+            unoptimized
+            style={{ width: "100%", height: "auto", border: "1px solid #ccc" }}
+          />
+          <p className="figure-caption">
+            <strong>Figure 6.</strong> Radial profiles by class. See{" "}
+            <Link href="/methodology">methodology</Link> for halo score table.
+          </p>
+        </figure>
+      </section>
+
+      <section>
+        <h2>3. Benchmark Results</h2>
         <p className="caption">
           Synthetic holdout, n = {h.n_per_class} per class. Compared against Rostad et al., Emory SPR 2020.
         </p>
@@ -151,7 +174,7 @@ python3 -m haloscan.evaluate --n 40    # regenerate metrics.json`}</pre>
       </section>
 
       <section>
-        <h2>3. Confusion Matrix</h2>
+        <h2>4. Confusion Matrix</h2>
         <p>
           Four-class evaluation on synthetic radiographs (battery, coin, stacked coins, normal). Predictions map to
           emergency-aware battery class when probability or heuristics trigger CRITICAL pathway.
@@ -200,7 +223,7 @@ python3 -m haloscan.evaluate --n 40    # regenerate metrics.json`}</pre>
       </section>
 
       <section>
-        <h2>4. Limitations (Stated Explicitly)</h2>
+        <h2>5. Limitations (Stated Explicitly)</h2>
         <ul className="research">
           <li>Evaluation uses synthetic radiographs—not a multi-site clinical trial.</li>
           <li>Coin sensitivity (73%) is lower than Emory baseline (83%) due to conservative battery bias.</li>
