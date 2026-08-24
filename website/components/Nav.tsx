@@ -23,6 +23,9 @@ export function Nav({
         <Link href="/scan" aria-current={current === "demo" ? "page" : undefined}>
           Scanner
         </Link>
+        <Link href="/scan?judge=1" className="nav-judge-demo">
+          Judge Demo
+        </Link>
         <Link href="/gallery" aria-current={current === "gallery" ? "page" : undefined}>
           Gallery
         </Link>

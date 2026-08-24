@@ -13,3 +13,7 @@ website/node_modules/
 website/.next/
 website/.vercel/
 website/.env.local
+media/
+renders/*.tmp.mp4
+renders/*.mp4
+renders/*.wav

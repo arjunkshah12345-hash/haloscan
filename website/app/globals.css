@@ -1,5 +1,5 @@
 :root {
-  --bg: #ffffff;
+  --bg: #fafaf8;
   --text: #111111;
   --secondary: #333333;
   --muted: #555555;
@@ -83,6 +83,7 @@ nav .site-title {
   letter-spacing: 0.01em;
   text-decoration: none;
   color: var(--text);
+  background-image: linear-gradient(transparent 60%, rgba(139, 0, 0, 0.12) 60%);
 }
 
 nav .site-title:hover {
@@ -106,6 +107,11 @@ nav .site-title:hover {
 .nav-links a[aria-current="page"] {
   color: var(--text);
   text-decoration: underline;
+}
+
+.nav-judge-demo {
+  color: var(--critical) !important;
+  font-weight: 700;
 }
 
 .doc-header {
@@ -205,6 +211,86 @@ section p:last-child {
   margin-top: 20px;
 }
 
+.hero-launch {
+  margin-bottom: 40px;
+  border: 2px solid var(--text);
+  background: linear-gradient(165deg, #f5f3ef 0%, var(--bg) 45%, #fff 100%);
+}
+
+.hero-launch-inner {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 28px;
+  padding: 28px 28px 24px;
+  align-items: center;
+}
+
+.hero-eyebrow {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--critical);
+}
+
+.hero-title {
+  margin: 0 0 12px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.hero-desc {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--secondary);
+}
+
+.hero-desc kbd {
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.hero-stat {
+  border: 1px solid var(--line);
+  padding: 14px 12px;
+  text-align: center;
+  background: #fff;
+}
+
+.hero-stat-n {
+  display: block;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text);
+}
+
+.hero-stat-l {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+@media (max-width: 720px) {
+  .hero-launch-inner {
+    grid-template-columns: 1fr;
+  }
+}
+
 .btn {
   display: inline-block;
   border: 1px solid var(--text);
@@ -231,6 +317,24 @@ section p:last-child {
 .btn-ghost:hover {
   background: var(--soft);
   color: var(--text);
+}
+
+.judge-cta-box {
+  margin-bottom: 40px;
+  padding: 24px 28px;
+  border: 2px solid var(--text);
+  background: var(--soft);
+}
+
+.judge-cta-box h2 {
+  margin: 0 0 10px;
+  font-size: 22px;
+}
+
+.judge-cta-box p {
+  margin: 0 0 16px;
+  text-align: left;
+  color: var(--secondary);
 }
 
 table.data {

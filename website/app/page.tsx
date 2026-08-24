@@ -3,12 +3,15 @@ import Image from "next/image";
 import { CaseFigure, CompareRow } from "@/components/CaseFigure";
 import { ArchitectureDiagram } from "@/components/ArchitectureDiagram";
 import { TimelineDiagram } from "@/components/TimelineDiagram";
+import { HeroLaunch } from "@/components/HeroLaunch";
 import { Nav } from "@/components/Nav";
 
 export default function HomePage() {
   return (
     <div className="page">
       <Nav current="home" />
+
+      <HeroLaunch />
 
       <header className="doc-header">
         <h1>Haloscan: Distinguishing Button Batteries from Coins on Pediatric Chest Radiographs</h1>
@@ -43,7 +46,10 @@ export default function HomePage() {
       </div>
 
       <div className="cta-row">
-        <Link href="/scan" className="btn">
+        <Link href="/scan?judge=1" className="btn">
+          Try Live Scanner (Judge Demo)
+        </Link>
+        <Link href="/scan" className="btn btn-ghost">
           Open Clinical Scanner
         </Link>
         <Link href="/judges" className="btn btn-ghost">

@@ -16,13 +16,29 @@ export default function JudgesPage() {
         </p>
       </header>
 
+      <div className="judge-cta-box">
+        <h2>Start here — 90 seconds</h2>
+        <p>
+          One click runs Case 1 (battery → CRITICAL) then Case 3 (stacked coins → false halo trap). Real PyTorch
+          inference on the cloud API.
+        </p>
+        <div className="cta-row">
+          <Link href="/scan?judge=1" className="btn">
+            Launch judge demo →
+          </Link>
+          <Link href="/scan" className="btn btn-ghost">
+            Manual scanner
+          </Link>
+        </div>
+      </div>
+
       <section>
         <h2>1. Quick Verification Protocol</h2>
         <ol className="research">
           <li>
             Open the{" "}
-            <Link href="/scan">Clinical Scanner</Link> and press key <strong>1</strong> (button battery case).
-            Confirm a CRITICAL protocol appears with the two-hour esophageal window.
+            <Link href="/scan?judge=1">Clinical Scanner (judge demo)</Link> — or press key <strong>1</strong>{" "}
+            (button battery case). Confirm a CRITICAL protocol appears with the two-hour esophageal window.
           </li>
           <li>
             Press key <strong>3</strong> (stacked coins — the hard false-halo case). Confirm the system flags a
@@ -78,7 +94,8 @@ export default function JudgesPage() {
           </thead>
           <tbody>
             {[
-              ["/scan", "Live PyTorch inference, keys 1–4, Grad-CAM + radial charts"],
+              ["/scan?judge=1", "Auto-runs Cases 1 + 3 · live PyTorch inference"],
+              ["/scan", "Live scanner · keys 1–4 · Grad-CAM + radial charts"],
               ["/gallery", "All 16+ exported figure panels with inference metrics"],
               ["/validation", "Benchmark chart, confusion matrix, 5/5 smoke tests"],
               ["/methodology", "Synthetic training data, radial profiles, decision flow"],

@@ -42,6 +42,7 @@ The core difficulty is stacked coins creating false "double halo" patterns on AP
 | Field | URL |
 |-------|-----|
 | **Live app** | https://haloscan.ideatr.dev/scan |
+| **Judge demo (auto)** | https://haloscan.ideatr.dev/scan?judge=1 |
 | **Website** | https://haloscan.ideatr.dev |
 | **API (Render)** | https://haloscan.onrender.com |
 | **Training** | https://www.kaggle.com/code/aks1321/coincell-train-cpu |

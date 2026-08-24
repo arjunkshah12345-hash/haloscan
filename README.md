@@ -11,6 +11,7 @@
 
 <p align="center">
   <a href="https://haloscan.ideatr.dev/scan">Live Scanner</a> ·
+  <a href="https://haloscan.ideatr.dev/scan?judge=1">Judge Demo</a> ·
   <a href="https://haloscan.ideatr.dev/judges">Judge Guide</a> ·
   <a href="https://www.kaggle.com/code/aks1321/coincell-train-cpu">Training</a>
 </p>

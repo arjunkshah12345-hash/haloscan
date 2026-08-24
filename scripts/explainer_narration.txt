@@ -1,0 +1,27 @@
+Imagine a toddler swallows something small and round. A button battery, or a coin.
+
+In the emergency room, doctors face one urgent question. Battery, or coin?
+
+If it's a battery stuck in the esophagus, tissue can start dying in about two hours. Endoscopy can't wait.
+
+On a chest X-ray, both look like bright discs. Radiologists look for the double halo sign. A bright outer ring, and a second ring inside. That's classic for a button battery.
+
+But here is the trap. Two stacked coins can fake that same halo pattern. Many readers call it a coin. And send the child home.
+
+In twenty twenty two, Congress passed Reese's Law. Four hundred and nine to two. Child proof battery packaging. A huge prevention win.
+
+But Reese's Law does not help the child who already swallowed something. Congress fixed the packaging. Not the diagnosis.
+
+That's the gap Haloscan closes.
+
+Haloscan runs two analyses in parallel. First, computer vision. It draws circles on the X-ray and measures brightness at each radius. Batteries create a distinctive dip in the radial profile.
+
+Second, a neural network called DualViewNet. It reads the front view, and the side view when available. Missing a battery costs three times more in training than missing a coin.
+
+The two branches fuse into one probability. And here is the key design choice. When the halo looks ambiguous, Haloscan does not guess coin. It flags treat as battery, until endoscopy proves otherwise.
+
+On synthetic benchmarks, Haloscan reaches one hundred percent battery sensitivity. Versus eighty one percent in a twenty twenty Emory hospital study that never shipped clinically.
+
+The live app shows Grad CAM heatmaps, detection overlays, radial charts, and a critical protocol with the two hour window and emergency hotlines.
+
+Haloscan. Reese's Law fixed prevention. This fixes diagnosis. Live at haloscan dot ideatr dot dev.

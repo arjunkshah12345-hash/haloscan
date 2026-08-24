@@ -1,77 +1,39 @@
-# Haloscan — Video Shot List (2:15 target)
+# Haloscan — Video Guide
 
-Record screen + voiceover. Use QuickTime or OBS. Mic > camera quality.
+## Manim explainer (3Blue1Brown-style) — SILENT for your voiceover
 
----
+```bash
+python3 -m manim -qm --format=mp4 scripts/manim_haloscan.py HaloscanExplainer
+python3 scripts/manim_haloscan.py --export
+# → renders/haloscan_explainer_silent.mp4
+```
 
-## Pre-recording setup
+**Add voiceover:** import silent MP4 into iMovie / DaVinci / Premiere, record on top.
 
-1. Run `./scripts/run.sh` OR use **https://haloscan.ideatr.dev/scan**
-2. Browser zoom 100%, close unrelated tabs
-3. Fullscreen the app window
-4. Script on second monitor (don't read robotically)
+**Tune pacing:** edit `SCENE_PAD` in `scripts/manim_haloscan.py` (seconds between scenes).
 
----
+**What's in the video:**
+- Title, problem, real X-ray PNGs, double halo annulus animation
+- Stacked-coin trap, Reese's Law 409–2
+- **DualViewNet diagram** (twin encoders, concat, fusion MLP, softmax)
+- **Math panel:** fusion equation, ambiguity rule, weighted cross-entropy loss
+- Pipeline pills + Grad-CAM, radial profile graph with tracing dot, benchmark bars
 
-## Shot list
+**Quality:** `-ql` preview · `-qm` 720p submit · `-qh` 1080p60
 
-### SHOT 1 — Cold open (8 sec)
-- **Visual:** Text slide or browser: "Reese's Law: 409–2"
-- **Audio:** "Congress passed Reese's Law four hundred and nine to two. Child-proof battery compartments. But not the ER diagnosis."
-
-### SHOT 2 — Problem (12 sec)
-- **Visual:** Simple diagram or text: "Battery vs Coin on X-ray · 2 hour window"
-- **Audio:** "When a toddler swallows a disc, doctors have two hours if it's a battery in the esophagus. Stacked coins fake the halo sign."
-
-### SHOT 3 — App reveal (5 sec)
-- **Visual:** Navigate to **https://haloscan.ideatr.dev/scan**
-- **Audio:** "Haloscan — the double halo, decoded."
-
-### SHOT 4 — Battery demo (20 sec)
-- **Visual:** Click **Battery** quick case
-- **Show:** Verdict CRITICAL, probability bars, overlay, protocol panel
-- **Audio:** "Battery case — halo detected, critical protocol, endoscopy within two hours, Poison Control listed."
-
-### SHOT 5 — Stacked coins (20 sec)
-- **Visual:** Click **Stacked coins**
-- **Show:** Ambiguous halo, still emergency
-- **Audio:** "This is the hard case — stacked coins mimic batteries. Haloscan flags treat-as-emergency anyway."
-
-### SHOT 6 — Explainability (15 sec)
-- **Visual:** Scroll to Grad-CAM + radial profile images
-- **Audio:** "Grad-CAM shows model focus. Radial profile quantifies the halo sign from first principles."
-
-### SHOT 7 — Code flash (12 sec)
-- **Visual:** Open GitHub → `haloscan/models.py` DualViewNet → `halo_analyzer.py`
-- **Audio:** "Dual-view fusion network plus OpenCV halo physics. Battery-weighted loss — never miss a battery."
-
-### SHOT 8 — Report (10 sec)
-- **Visual:** Click **Download clinical report** → show HTML opens
-- **Audio:** "Full clinical report — printable, with hotlines."
-
-### SHOT 9 — Benchmark (10 sec)
-- **Visual:** Metrics panel in sidebar
-- **Audio:** "Benchmarked against Emory twenty-twenty — eighty-one percent baseline."
-
-### SHOT 10 — Close (13 sec)
-- **Visual:** Homepage with URL visible + GitHub link
-- **Audio:** "Haloscan. Reese's Law fixed prevention. This fixes diagnosis. Link in submission."
+Optional auto-narration (skip if you're voicing): `python3 scripts/manim_haloscan.py --mux`
 
 ---
 
-## Post-production (minimal)
+## Live screen recording (backup)
 
-- Trim dead air at start/end
-- Optional: 3 sec title card "Haloscan · Congressional App Challenge 2026"
-- Export 1080p, upload YouTube (public or unlisted)
-- **Do NOT** add music that drowns voiceover
+Record **https://haloscan.ideatr.dev/scan** — keys **1** and **3**.
 
 ---
 
-## Rubric mapping
+## CAC checklist
 
-| Shot | Rubric criterion |
-|------|------------------|
-| 1–2 | Quality of idea |
-| 3–5, 8 | Implementation |
-| 6–7, 9 | Coding excellence |
+- [ ] 1–3 min with your voiceover
+- [ ] Name(s), app name **Haloscan**, purpose, audience, tools
+- [ ] YouTube/Vimeo link in submission form
+
