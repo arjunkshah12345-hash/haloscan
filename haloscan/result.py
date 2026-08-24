@@ -25,6 +25,7 @@ class HaloscanResult:
     gradcam_b64: str
     dual_view_used: bool
     inference_ms: float = 0.0
+    stacked_mimic: bool = False
 
     def to_dict(self) -> dict:
         d = asdict(self)

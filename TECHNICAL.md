@@ -26,6 +26,7 @@ After Reese's Law (P.L. 117-171), button battery packaging became child-resistan
 - **Disc localization:** Otsu thresholding → contour circularity scoring → Hough circle fallback → adaptive threshold fallback
 - **Radial profile:** Sample intensity at increasing radii from disc center; normalize to [0,1]
 - **Halo score:** Detect dip between inner peaks (lucent ring of battery rim)
+- **Multi-peak detector:** Counts radial intensity peaks — stacked coins often show 3+ rings on AP without lateral step-off (`stacked_mimic_score`)
 - **Step-off score:** Vertical mass asymmetry on lateral view (battery pole geometry)
 
 ### 2. Neural network layer (`models.py`)

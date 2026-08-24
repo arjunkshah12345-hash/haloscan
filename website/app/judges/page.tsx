@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
+import { ReadMore } from "@/components/ReadMore";
 
 export default function JudgesPage() {
   return (
@@ -7,153 +8,76 @@ export default function JudgesPage() {
       <Nav current="judges" />
 
       <header className="doc-header">
-        <h1>Judge Verification Guide</h1>
-        <p className="doc-subtitle">Congressional App Challenge 2026 — Haloscan</p>
-        <p className="doc-meta">
-          This page describes how to verify Haloscan in approximately 90 seconds. The project addresses the
-          diagnostic gap left open by Reese&apos;s Law (P.L. 117-171): Congress mandated safer battery packaging,
-          but emergency departments still struggle to distinguish batteries from coins on X-ray.
-        </p>
+        <h1>Judge verification</h1>
+        <p className="doc-subtitle">Congressional App Challenge 2026</p>
       </header>
 
-      <div className="judge-cta-box">
-        <h2>Start here — 90 seconds</h2>
-        <p>
-          One click runs Case 1 (battery → CRITICAL) then Case 3 (stacked coins → false halo trap). Real PyTorch
-          inference on the cloud API.
-        </p>
-        <div className="cta-row">
-          <Link href="/scan?judge=1" className="btn">
-            Launch judge demo →
-          </Link>
-          <Link href="/scan" className="btn btn-ghost">
-            Manual scanner
-          </Link>
-        </div>
-      </div>
+      <p>
+        <Link href="/scan?judge=1">Run the 90-second judge demo</Link> — auto-runs Case 1 (battery) then Case 3
+        (stacked coins). Real PyTorch inference on the cloud API.
+      </p>
 
-      <section>
-        <h2>1. Quick Verification Protocol</h2>
+      <ReadMore title="Quick verification steps">
         <ol className="research">
           <li>
-            Open the{" "}
-            <Link href="/scan?judge=1">Clinical Scanner (judge demo)</Link> — or press key <strong>1</strong>{" "}
-            (button battery case). Confirm a CRITICAL protocol appears with the two-hour esophageal window.
+            Open <Link href="/scan?judge=1">/scan?judge=1</Link> or press key <strong>1</strong>. Confirm CRITICAL
+            protocol with two-hour window.
           </li>
           <li>
-            Press key <strong>3</strong> (stacked coins — the hard false-halo case). Confirm the system flags a
-            battery emergency despite coin-like appearance.
+            Press key <strong>3</strong> (stacked coins). Confirm battery emergency despite coin-like appearance.
           </li>
-          <li>Scroll to Grad-CAM, detection overlay, and radial intensity profile figures.</li>
+          <li>Inspect Grad-CAM, detection overlay, and radial profile in the results.</li>
           <li>
-            Clone the repository and run <code>python3 tests/smoke_test.py</code> — all checks should pass.
-          </li>
-          <li>
-            Review <Link href="/gallery">figure gallery</Link>,{" "}
-            <Link href="/methodology">methodology</Link>,{" "}
-            <Link href="/architecture">architecture</Link>,{" "}
-            <Link href="/validation">validation figures</Link>, and{" "}
-            <Link href="/use-cases">clinical use cases</Link> on the site; README.md and TECHNICAL.md on GitHub.
+            Clone repo and run <code>python3 tests/smoke_test.py</code> — all checks pass.
           </li>
         </ol>
-      </section>
+      </ReadMore>
 
-      <section>
-        <h2>2. Rubric Mapping</h2>
-
-        <h3>2.1 Problem &amp; Idea</h3>
+      <ReadMore title="Rubric mapping">
+        <h3>Problem</h3>
         <p>
-          Reese&apos;s Law fixed prevention; Haloscan addresses diagnosis. The app targets a named clinical
-          failure mode (stacked coins mimicking the double halo sign) and the two-hour esophageal emergency
-          window for lodged button batteries.
+          Reese&apos;s Law fixed prevention; Haloscan addresses diagnosis — stacked coins mimicking the double halo
+          sign, two-hour esophageal emergency window.
         </p>
-
-        <h3>2.2 Implementation</h3>
+        <h3>Implementation</h3>
         <p>
-          Live web demo with real PyTorch inference (not pre-recorded JSON). Dual-view upload, ensemble
-          probability breakdown, Grad-CAM explainability, printable HTML clinical reports, and deployment on
-          Vercel (frontend) plus Render (API).
+          Live web demo with real PyTorch inference, dual-view upload, Grad-CAM, clinical reports. Deployed on Vercel
+          + Render.
         </p>
-
-        <h3>2.3 Technical Depth</h3>
+        <h3>Technical depth</h3>
         <p>
-          OpenCV radial halo physics combined with DualViewNet fusion. Kaggle CPU training with bundled weights.
-          Automated smoke tests. Open-source MIT license. Battery sensitivity exceeds the published Emory 2020
-          machine-learning baseline on synthetic holdout data.
+          OpenCV radial profiling + DualViewNet fusion. Kaggle CPU training, bundled weights, smoke tests, MIT license.
+          100% battery sensitivity on synthetic holdout vs. 81% Emory baseline.
         </p>
-      </section>
+      </ReadMore>
 
-      <section>
-        <h2>3. Site Map for Judges</h2>
-        <table className="data">
-          <thead>
-            <tr>
-              <th>Page</th>
-              <th>What to verify</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              ["/scan?judge=1", "Auto-runs Cases 1 + 3 · live PyTorch inference"],
-              ["/scan", "Live scanner · keys 1–4 · Grad-CAM + radial charts"],
-              ["/gallery", "All 16+ exported figure panels with inference metrics"],
-              ["/validation", "Benchmark chart, confusion matrix, 5/5 smoke tests"],
-              ["/methodology", "Synthetic training data, radial profiles, decision flow"],
-              ["/architecture", "SVG pipeline diagram, API routes, deployment"],
-              ["/use-cases", "Four clinical vignettes with real model outputs"],
-            ].map(([href, desc]) => (
-              <tr key={href}>
-                <td>
-                  <Link href={href}>{href}</Link>
-                </td>
-                <td>{desc}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-
-      <section>
-        <h2>4. Published Figures on the Home Page</h2>
-        <p>
-          The landing page includes Figures 1–3 generated by the same inference pipeline as the live scanner:
-          AP radiographs, detection overlays, Grad-CAM attention maps, and radial intensity profiles. These
-          are exported via <code>python3 scripts/export_figures.py</code> and stored in{" "}
-          <code>website/public/figures/</code>.
-        </p>
-      </section>
-
-      <section>
-        <h2>5. Key Repository Files</h2>
-        <ul className="list">
-          {[
-            ["haloscan/halo_analyzer.py", "Radial halo profiling"],
-            ["haloscan/models.py", "DualViewNet architecture"],
-            ["haloscan/inference.py", "Ensemble engine and Grad-CAM"],
-            ["haloscan/clinical.py", "Protocol engine (CRITICAL / URGENT / ROUTINE)"],
-            ["weights/haloscan.pt", "Bundled model weights (~3.5 MB)"],
-            ["tests/smoke_test.py", "Automated verification"],
-          ].map(([file, desc]) => (
-            <li key={file}>
-              <a
-                href={`https://github.com/arjunkshah12345-hash/haloscan/blob/main/${file}`}
-                className="row-link"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span>
-                  <code>{file}</code> — {desc}
-                </span>
-                <span>↗</span>
-              </a>
-            </li>
-          ))}
+      <ReadMore title="Site map">
+        <ul className="plain-list">
+          <li>
+            <Link href="/scan?judge=1">/scan?judge=1</Link> — auto demo
+          </li>
+          <li>
+            <Link href="/scan">/scan</Link> — live scanner
+          </li>
+          <li>
+            <Link href="/gallery">/gallery</Link> — all figures
+          </li>
+          <li>
+            <Link href="/validation">/validation</Link> — benchmarks
+          </li>
+          <li>
+            <Link href="/methodology">/methodology</Link> — training data
+          </li>
+          <li>
+            <Link href="/architecture">/architecture</Link> — system design
+          </li>
         </ul>
-      </section>
+      </ReadMore>
 
       <footer>
-        <span>Not a medical device · No patient data stored</span>
-        <Link href="/">← Home</Link>
+        <p>
+          <Link href="/">← Home</Link>
+        </p>
       </footer>
     </div>
   );

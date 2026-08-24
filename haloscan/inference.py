@@ -69,10 +69,14 @@ class HaloscanEngine:
 
         # Stacked coins: false halo on AP without lateral step-off (Reese's Law hard case)
         stacked_mimic = (
-            ap_halo.center is not None
-            and ap_halo.halo_score > 0.32
-            and (lat_halo is None or lat_halo.stepoff_score < 0.35)
-            and bat_n > 0.28
+            ap_halo.stacked_mimic_score >= 0.42
+            or ap_halo.profile_peaks >= 4
+            or (
+                ap_halo.center is not None
+                and ap_halo.halo_score > 0.32
+                and (lat_halo is None or lat_halo.stepoff_score < 0.35)
+                and bat_n > 0.28
+            )
         )
         ap_only_disc = (
             ap_halo.center is not None
@@ -98,6 +102,10 @@ class HaloscanEngine:
             explanation += " Lateral step-off morphology supports button battery."
         elif lat_halo is not None and lat_halo.stepoff_score < 0.22 and ap_halo.halo_score > 0.38:
             explanation += " AP halo without lateral step-off — stacked coins in differential; manage urgently."
+        elif stacked_mimic:
+            explanation += (
+                f" Stacked-coin mimic pattern (AP peaks={ap_halo.profile_peaks}, mimic={ap_halo.stacked_mimic_score:.2f}) — conservative battery protocol."
+            )
 
         protocol = build_protocol(bat_n, ambiguous, dual_used)
         overlay = draw_overlay(ap_gray, ap_halo, prediction.split()[0])
@@ -128,6 +136,7 @@ class HaloscanEngine:
             gradcam_b64=numpy_to_b64(gradcam),
             dual_view_used=dual_used,
             inference_ms=elapsed_ms,
+            stacked_mimic=stacked_mimic,
         )
 
 

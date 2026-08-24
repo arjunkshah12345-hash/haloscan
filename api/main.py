@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Haloscan API", version="2.2.0", lifespan=lifespan)
+app = FastAPI(title="Haloscan API", version="2.3.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 
@@ -211,7 +211,7 @@ async def health():
     bundled = _bundled_metrics()
     return {
         "status": "ok",
-        "version": "2.2.0",
+        "version": "2.3.0",
         "model": "loaded",
         "weights": "bundled" if (ROOT / "weights" / "haloscan.pt").exists() else "custom",
         "metrics": bundled is not None,

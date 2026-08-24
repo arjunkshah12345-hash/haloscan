@@ -63,7 +63,7 @@ export default function GalleryPage() {
 
   return (
     <div className="page-wide">
-      <Nav current="gallery" />
+      <Nav />
 
       <header className="doc-header">
         <h1>Figure Gallery</h1>

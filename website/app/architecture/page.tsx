@@ -38,7 +38,7 @@ const MODULES = [
 export default function ArchitecturePage() {
   return (
     <div className="page-wide">
-      <Nav current="architecture" />
+      <Nav />
 
       <header className="doc-header">
         <h1>System Architecture</h1>

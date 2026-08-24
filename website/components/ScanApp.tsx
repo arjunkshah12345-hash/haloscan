@@ -9,6 +9,8 @@ type Halo = {
   stepoff_score: number;
   battery_score: number;
   coin_score: number;
+  profile_peaks?: number;
+  stacked_mimic_score?: number;
 };
 
 type Protocol = {
@@ -38,6 +40,7 @@ type Result = {
   overlay_b64: string;
   gradcam_b64: string;
   radial_chart_b64: string;
+  stacked_mimic?: boolean;
 };
 
 type Metrics = {
@@ -272,81 +275,44 @@ export function ScanApp() {
 
   return (
     <div className="scan-root">
-      <header className="scan-header dither-accent">
+      <header className="scan-header">
         <div className="scan-brand">
-          <div>
-            <h1>Haloscan Clinical Scanner</h1>
-            <span>Live PyTorch + OpenCV ensemble · Reese&apos;s Law (P.L. 117-171)</span>
-          </div>
+          <h1>Haloscan scanner</h1>
+          <p className="scan-tagline">Live inference · keys 1–4</p>
         </div>
         <div className="scan-nav">
           <span className={`status-pill ${apiLive ? "live" : apiWarming ? "warm" : ""}`}>
-            {apiWarming ? "Warming API…" : apiLive === null ? "Connecting…" : apiLive ? "API online" : "API offline"}
+            {apiWarming ? "Warming…" : apiLive === null ? "…" : apiLive ? "Online" : "Offline"}
           </span>
           <Link href="/">Home</Link>
           <Link href="/judges">Judges</Link>
-          <button type="button" className="scan-help-btn" onClick={() => setShowHelp(true)} title="Keyboard shortcuts">
-            ?
-          </button>
-          <a href="https://github.com/arjunkshah12345-hash/haloscan" target="_blank" rel="noopener noreferrer">
-            GitHub
-          </a>
         </div>
       </header>
 
       {judgeBanner && (
-        <div className="judge-banner">
-          <div className="judge-banner-inner">
-            <strong>Judge quick demo</strong>
-            <span>
-              Press <kbd>1</kbd> for battery (CRITICAL) · <kbd>3</kbd> for stacked coins (false halo trap) · Real
-              inference, not cached JSON
-            </span>
-            <button type="button" className="btn-judge-run" onClick={runJudgeDemo} disabled={loading || !apiLive}>
-              Run both cases automatically
-            </button>
-            <button type="button" className="btn-judge-dismiss" onClick={() => setJudgeBanner(false)} aria-label="Dismiss">
-              ×
-            </button>
-          </div>
-        </div>
+        <p className="scan-judge-hint">
+          Judge demo: press <kbd>1</kbd> then <kbd>3</kbd>.{" "}
+          <button type="button" className="link-btn" onClick={runJudgeDemo} disabled={loading || !apiLive}>
+            Run both automatically
+          </button>
+        </p>
       )}
 
       <div className="example-strip">
-        <div className="example-strip-head">
-          <h2>Reference cases — live server inference</h2>
-          <p>Keys 1–4 · Each click runs the full Haloscan pipeline on Render</p>
-        </div>
-        <div className="example-grid">
+        <p className="example-label">Reference cases</p>
+        <ul className="case-list">
           {CASES.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              className={`example-card scan-example-card-dither ${activeCase === c.id ? "active" : ""}`}
-              onClick={() => runDemo(c.id)}
-            >
-              <span className="example-key">{c.key}</span>
-              <img src={c.fig} alt={c.title} />
-              <div className="example-card-body">
-                <strong>{c.title}</strong>
-                <span>{c.sub}</span>
-              </div>
-            </button>
+            <li key={c.id}>
+              <button
+                type="button"
+                className={`case-link ${activeCase === c.id ? "active" : ""}`}
+                onClick={() => runDemo(c.id)}
+              >
+                <kbd>{c.key}</kbd> {c.title} — {c.sub}
+              </button>
+            </li>
           ))}
-        </div>
-      </div>
-
-      <div className="compare-strip">
-        <div className="compare-strip-item">
-          <img src="/figures/battery/ap.png" alt="Battery" />
-          <span>Case 1 · True battery</span>
-        </div>
-        <div className="compare-strip-mid">vs</div>
-        <div className="compare-strip-item trap">
-          <img src="/figures/stacked/ap.png" alt="Stacked coins" />
-          <span>Case 3 · False halo trap</span>
-        </div>
-        <p className="compare-strip-note">Haloscan flags both as emergencies — that&apos;s the point.</p>
+        </ul>
       </div>
 
       <div className="scan-layout">
@@ -463,34 +429,37 @@ export function ScanApp() {
                 <span>{(r.coin_probability * 100).toFixed(0)}%</span>
               </div>
 
-              <div className="ensemble">
-                <strong>Ensemble decomposition</strong>
+              <p className="explanation">{r.explanation}</p>
+
+              <details className="scan-details">
+                <summary>Radiographic features</summary>
+                <ul className="feature-list">
+                  <li>AP halo score: {r.ap_halo.halo_score.toFixed(2)}</li>
+                  <li>AP radial peaks: {r.ap_halo.profile_peaks ?? 0}</li>
+                  <li>Stacked-coin mimic: {(r.ap_halo.stacked_mimic_score ?? 0).toFixed(2)}{r.stacked_mimic ? " · flagged" : ""}</li>
+                  {r.lat_halo && <li>Lateral step-off: {r.lat_halo.stepoff_score.toFixed(2)}</li>}
+                  <li>CV battery / coin: {(r.cv_probs.battery * 100).toFixed(0)}% / {(r.cv_probs.coin * 100).toFixed(0)}%</li>
+                  <li>CNN battery / coin: {((r.model_probs.battery ?? 0) * 100).toFixed(0)}% / {((r.model_probs.coin ?? 0) * 100).toFixed(0)}%</li>
+                </ul>
+              </details>
+
+              <details className="scan-details">
+                <summary>Ensemble breakdown</summary>
                 <div className="ensemble-grid">
                   <div>
                     <span className="ensemble-label">CV branch</span>
                     {(r.cv_probs.battery * 100).toFixed(0)}% battery
-                    <div className="mini-bar">
-                      <div className="bar-fill bar-bat" style={{ width: `${r.cv_probs.battery * 100}%` }} />
-                    </div>
                   </div>
                   <div>
                     <span className="ensemble-label">CNN branch</span>
                     {((r.model_probs.battery ?? 0) * 100).toFixed(0)}% battery
-                    <div className="mini-bar">
-                      <div className="bar-fill bar-bat" style={{ width: `${(r.model_probs.battery ?? 0) * 100}%` }} />
-                    </div>
                   </div>
                   <div>
                     <span className="ensemble-label">Fused</span>
                     {(r.battery_probability * 100).toFixed(0)}% battery
-                    <div className="mini-bar">
-                      <div className="bar-fill bar-bat" style={{ width: `${r.battery_probability * 100}%` }} />
-                    </div>
                   </div>
                 </div>
-              </div>
-
-              <p className="explanation">{r.explanation}</p>
+              </details>
 
               <div className="img-grid">
                 <figure>
@@ -507,21 +476,23 @@ export function ScanApp() {
                 </figure>
               </div>
 
-              <div className="protocol">
-                <h3 style={{ color: r.protocol.color }}>{r.protocol.urgency} — Clinical protocol</h3>
-                <p className="protocol-window">{r.protocol.time_window}</p>
-                <ul>
-                  {r.protocol.actions.map((a) => (
-                    <li key={a}>{a}</li>
+              <details className="scan-details">
+                <summary>Clinical protocol — {r.protocol.urgency}</summary>
+                <div className="protocol">
+                  <p className="protocol-window">{r.protocol.time_window}</p>
+                  <ul>
+                    {r.protocol.actions.map((a) => (
+                      <li key={a}>{a}</li>
+                    ))}
+                  </ul>
+                  {r.protocol.contacts.map((c) => (
+                    <p key={c} className="protocol-contact">
+                      {c}
+                    </p>
                   ))}
-                </ul>
-                {r.protocol.contacts.map((c) => (
-                  <p key={c} className="protocol-contact">
-                    {c}
-                  </p>
-                ))}
-                <p className="protocol-reese">{r.protocol.reese_law_note}</p>
-              </div>
+                  <p className="protocol-reese">{r.protocol.reese_law_note}</p>
+                </div>
+              </details>
 
               <div className="actions">
                 <button type="button" className="btn-sec" onClick={downloadReport}>
@@ -544,33 +515,17 @@ export function ScanApp() {
           )}
         </section>
 
-        <aside className="scan-panel scan-aside">
-          <h2>Why Haloscan wins</h2>
-          <div className="stat-cards">
-            <div className="stat-card highlight">
-              <span className="stat-val">{batSens != null ? `${(batSens * 100).toFixed(0)}%` : "100%"}</span>
-              <span className="stat-lbl">Battery sensitivity</span>
+        <aside className="scan-aside">
+          <details className="read-more read-more-nested">
+            <summary>About this tool</summary>
+            <div className="read-more-body">
+              <p>
+                Battery sensitivity {batSens != null ? `${(batSens * 100).toFixed(0)}%` : "100%"} vs Emory 2020{" "}
+                {emory != null ? `${(emory * 100).toFixed(0)}%` : "81%"}. Stacked-coin catch 65%.
+              </p>
+              <p className="muted">Decision support only — not a medical device.</p>
             </div>
-            <div className="stat-card">
-              <span className="stat-val">{emory != null ? `${(emory * 100).toFixed(0)}%` : "81%"}</span>
-              <span className="stat-lbl">Emory 2020 baseline</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-val">65%</span>
-              <span className="stat-lbl">Stacked-coin catch</span>
-            </div>
-          </div>
-          <ul className="scan-sidebar-list">
-            <li>Reese&apos;s Law fixed packaging — not diagnosis</li>
-            <li>Stacked coins mimic the double halo sign</li>
-            <li>Grad-CAM + radial charts for transparency</li>
-            <li>No PHI stored · open source MIT</li>
-          </ul>
-          <div className="aside-links">
-            <Link href="/validation">Validation figures →</Link>
-            <Link href="/architecture">Architecture →</Link>
-          </div>
-          <p className="aside-disclaimer">Decision support only — not a medical device.</p>
+          </details>
         </aside>
       </div>
 

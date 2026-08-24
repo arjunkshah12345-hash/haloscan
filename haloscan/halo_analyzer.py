@@ -16,6 +16,8 @@ class HaloAnalysis:
     radius: int
     radial_profile: list[float]
     explanation: str
+    profile_peaks: int = 0
+    stacked_mimic_score: float = 0.0
 
 
 def _find_disc(enhanced: np.ndarray) -> tuple[tuple[int, int], int] | None:
@@ -141,6 +143,35 @@ def _stepoff_score(enhanced: np.ndarray, center: tuple[int, int], radius: int) -
     return float(np.clip(asym * 2.2, 0, 1))
 
 
+def _count_profile_peaks(profile: np.ndarray) -> int:
+    """Count significant peaks — stacked coins often show 3+ rings on AP."""
+    if len(profile) < 5:
+        return 0
+    sm = np.convolve(profile.astype(np.float32), np.ones(3) / 3, mode="same")
+    thresh = float(np.mean(sm) + 0.07)
+    peaks = 0
+    for i in range(1, len(sm) - 1):
+        if sm[i] > sm[i - 1] and sm[i] > sm[i + 1] and sm[i] >= thresh:
+            peaks += 1
+    return peaks
+
+
+def _stacked_mimic_score(profile: np.ndarray, halo: float, stepoff: float, view: str) -> float:
+    """Elevated when AP radial profile has multi-ring pattern without lateral step-off."""
+    if view != "ap":
+        return 0.0
+    peaks = _count_profile_peaks(profile)
+    if peaks >= 4:
+        return float(np.clip(0.52 + 0.08 * (peaks - 3), 0, 1))
+    if peaks >= 3 and halo > 0.12:
+        return float(np.clip(0.42 + 0.12 * (peaks - 2) + 0.22 * halo, 0, 1))
+    if peaks >= 2 and halo > 0.30 and stepoff < 0.22:
+        return float(np.clip(0.35 + 0.40 * halo, 0, 1))
+    if halo > 0.42 and stepoff < 0.18:
+        return float(np.clip(0.30 + 0.50 * halo, 0, 1))
+    return 0.0
+
+
 def _homogeneity_score(profile: np.ndarray) -> float:
     """Coins have monotonically increasing radial density; batteries do not."""
     if len(profile) < 4:
@@ -165,9 +196,14 @@ def analyze_halo(enhanced: np.ndarray, view: str = "ap") -> HaloAnalysis:
 
     center, radius = disc
     profile = _radial_profile(enhanced, center, radius)
-    halo = _halo_score(profile)
-    homog = _homogeneity_score(np.array(profile))
+    profile_arr = np.array(profile)
+    halo = _halo_score(profile_arr)
+    peaks = _count_profile_peaks(profile_arr)
+    mimic = _stacked_mimic_score(profile_arr, halo, 0.0, view)
+    homog = _homogeneity_score(profile_arr)
     stepoff = _stepoff_score(enhanced, center, radius) if view == "lateral" else 0.0
+    if view == "ap":
+        mimic = _stacked_mimic_score(profile_arr, halo, stepoff, view)
 
     if view == "lateral":
         battery = 0.35 * halo + 0.65 * stepoff
@@ -177,10 +213,10 @@ def analyze_halo(enhanced: np.ndarray, view: str = "ap") -> HaloAnalysis:
         coin = 0.70 * homog + 0.30 * max(0.0, 1.0 - halo)
 
     # Stacked coins can mimic halo — flag ambiguity
-    if halo > 0.45 and stepoff < 0.25 and view == "ap":
+    if mimic > 0.45 or (halo > 0.45 and stepoff < 0.25 and view == "ap"):
         explanation = (
-            "Double-halo pattern detected on AP view. This may be a button battery OR stacked coins. "
-            "Obtain lateral view and treat as battery until ruled out."
+            f"Multi-ring AP pattern ({peaks} radial peaks, mimic score {mimic:.2f}). "
+            "May be button battery OR stacked coins. Obtain lateral view and treat as battery until ruled out."
         )
     elif battery > 0.6:
         explanation = (
@@ -201,6 +237,8 @@ def analyze_halo(enhanced: np.ndarray, view: str = "ap") -> HaloAnalysis:
         radius=radius,
         radial_profile=profile.tolist(),
         explanation=explanation,
+        profile_peaks=peaks,
+        stacked_mimic_score=mimic,
     )
 
 

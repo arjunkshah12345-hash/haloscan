@@ -47,7 +47,7 @@ export function CaseFigure({
           </span>
         )}
       </figcaption>
-      <div className={`figure-grid figure-grid-${panels.length}`}>
+      <div className="figure-grid">
         {panels.map((p) => (
           <div key={p.label} className="figure-cell">
             <div className="figure-img-wrap">

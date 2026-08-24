@@ -57,7 +57,7 @@ const USE_CASES = [
 export default function UseCasesPage() {
   return (
     <div className="page">
-      <Nav current="usecases" />
+      <Nav />
 
       <header className="doc-header">
         <h1>Clinical Use Cases</h1>

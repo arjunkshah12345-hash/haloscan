@@ -19,7 +19,7 @@ export default function MethodologyPage() {
 
   return (
     <div className="page-wide">
-      <Nav current="methodology" />
+      <Nav />
 
       <header className="doc-header">
         <h1>Methodology &amp; Training</h1>

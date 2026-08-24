@@ -39,7 +39,7 @@ export default function ValidationPage() {
 
   return (
     <div className="page-wide">
-      <Nav current="validation" />
+      <Nav />
 
       <header className="doc-header">
         <h1>Validation &amp; Testing</h1>

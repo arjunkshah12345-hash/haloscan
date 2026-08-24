@@ -52,7 +52,7 @@ def test_report_generation():
     from haloscan.result import HaloscanResult
     from haloscan.report import generate_html_report
 
-    halo = HaloAnalysis(0.5, 0.3, 0.4, 0.6, (100, 100), 30, [0.1, 0.5, 0.8], "test")
+    halo = HaloAnalysis(0.5, 0.3, 0.4, 0.6, (100, 100), 30, [0.1, 0.5, 0.8], "test", 2, 0.3)
     protocol = build_protocol(0.7, True, False)
     r = HaloscanResult(
         prediction="BATTERY", confidence=0.8, battery_probability=0.8, coin_probability=0.2,
@@ -66,8 +66,40 @@ def test_report_generation():
     assert "Haloscan" in html and "CRITICAL" in html
 
 
+def test_inference_pipeline():
+    import cv2
+    import numpy as np
+    from haloscan.inference import get_engine
+    from haloscan.synthetic import generate_sample
+
+    engine = get_engine()
+
+    ap = generate_sample(0, seed=11)
+    lat = generate_sample(0, lateral=True, seed=12)
+    bat = engine.analyze(
+        cv2.cvtColor((ap * 255).astype(np.uint8), cv2.COLOR_GRAY2RGB),
+        cv2.cvtColor((lat * 255).astype(np.uint8), cv2.COLOR_GRAY2RGB),
+    )
+    assert bat.emergency and bat.battery_probability >= 0.48
+
+    coin_ap = generate_sample(1, seed=31)
+    coin = engine.analyze(cv2.cvtColor((coin_ap * 255).astype(np.uint8), cv2.COLOR_GRAY2RGB))
+    assert "COIN" in coin.prediction and not coin.emergency
+
+    stacked_ap = generate_sample(2, seed=31)
+    stacked = engine.analyze(cv2.cvtColor((stacked_ap * 255).astype(np.uint8), cv2.COLOR_GRAY2RGB))
+    assert stacked.emergency or stacked.ambiguous or stacked.stacked_mimic
+
+
 if __name__ == "__main__":
-    tests = [test_imports, test_synthetic_shapes, test_halo_analyzer, test_clinical_protocol, test_report_generation]
+    tests = [
+        test_imports,
+        test_synthetic_shapes,
+        test_halo_analyzer,
+        test_clinical_protocol,
+        test_report_generation,
+        test_inference_pipeline,
+    ]
     failed = 0
     for t in tests:
         try:
