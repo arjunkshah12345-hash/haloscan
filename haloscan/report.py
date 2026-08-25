@@ -90,6 +90,8 @@ def generate_html_report(result: HaloscanResult) -> str:
   <table>
     <tr><th>Metric</th><th>Value</th></tr>
     <tr><td>Halo score (AP)</td><td>{result.ap_halo.halo_score:.3f}</td></tr>
+    <tr><td>Radial peaks (AP)</td><td>{result.ap_halo.profile_peaks}</td></tr>
+    <tr><td>Stacked-coin mimic score</td><td>{result.ap_halo.stacked_mimic_score:.3f}</td></tr>
     <tr><td>Step-off score</td><td>{lat_step:.3f}</td></tr>
     <tr><td>Dual-view fusion</td><td>{"Yes" if result.dual_view_used else "No"}</td></tr>
     <tr><td>Emergency flag</td><td>{"Yes" if result.emergency else "No"}</td></tr>

@@ -286,6 +286,9 @@ export function ScanApp() {
           </span>
           <Link href="/">Home</Link>
           <Link href="/judges">Judges</Link>
+          <button type="button" className="link-btn" onClick={() => setShowHelp(true)} aria-label="Keyboard shortcuts">
+            ?
+          </button>
         </div>
       </header>
 

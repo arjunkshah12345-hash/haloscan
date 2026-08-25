@@ -2,8 +2,8 @@
   "metrics": {
     "haloscan": {
       "battery_sensitivity": 1.0,
-      "coin_sensitivity": 0.725,
-      "stacked_coin_emergency_rate": 0.65,
+      "coin_sensitivity": 0.375,
+      "stacked_coin_emergency_rate": 0.75,
       "n_per_class": 40
     },
     "baseline_emory_2020": {
@@ -30,14 +30,14 @@
         0
       ],
       [
-        11,
-        29,
+        25,
+        15,
         0,
         0
       ],
       [
-        26,
-        14,
+        30,
+        10,
         0,
         0
       ],
@@ -70,6 +70,10 @@
     {
       "name": "test_report_generation",
       "desc": "HTML clinical report export"
+    },
+    {
+      "name": "test_inference_pipeline",
+      "desc": "Full battery / coin / stacked inference on synthetic cases"
     }
   ],
   "ci_workflow": "Haloscan Tests (.github/workflows/test.yml)",

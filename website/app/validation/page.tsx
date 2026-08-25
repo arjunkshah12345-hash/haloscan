@@ -3,6 +3,7 @@ import path from "path";
 import Link from "next/link";
 import Image from "next/image";
 import { Nav } from "@/components/Nav";
+import { ReadMore } from "@/components/ReadMore";
 
 type ValidationReport = {
   metrics: {
@@ -38,212 +39,109 @@ export default function ValidationPage() {
   const b = metrics.baseline_emory_2020;
 
   return (
-    <div className="page-wide">
+    <div className="page">
       <Nav />
 
-      <header className="doc-header">
-        <h1>Validation &amp; Testing</h1>
-        <p className="doc-subtitle">Automated smoke tests, synthetic holdout benchmarks, and confusion analysis</p>
-        <p className="doc-meta">
-          Metrics regenerated via <code>python3 scripts/export_validation_figures.py</code>. CI runs{" "}
-          <code>python3 tests/smoke_test.py</code> on every push to <code>main</code>.
-        </p>
-      </header>
+      <h1>Validation</h1>
+      <p className="lede">
+        Synthetic holdout, n = {h.n_per_class} per class. Haloscan prioritizes battery safety over coin specificity.
+      </p>
 
-      <section>
-        <h2>1. Continuous Integration</h2>
-        <p>
-          GitHub Actions workflow <code>Haloscan Tests</code> installs PyTorch (CPU), OpenCV, and project
-          dependencies, then executes five smoke tests covering imports, synthetic data, halo analysis, clinical
-          protocols, and HTML report generation.
-        </p>
-        <table className="data">
-          <thead>
-            <tr>
-              <th>Test</th>
-              <th>What it verifies</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {smoke_tests.map((t) => (
-              <tr key={t.name}>
-                <td>
-                  <code>{t.name}</code>
-                </td>
-                <td>{t.desc}</td>
-                <td className="num">✓ Passing</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <pre>{`git clone https://github.com/arjunkshah12345-hash/haloscan.git
-cd haloscan && pip install -r requirements.txt
-python3 tests/smoke_test.py          # 5/5 must pass
-python3 -m haloscan.evaluate --n 40    # regenerate metrics.json`}</pre>
-      </section>
+      <table className="data">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Haloscan</th>
+            <th>Emory 2020</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Battery sensitivity</td>
+            <td>{(h.battery_sensitivity * 100).toFixed(0)}%</td>
+            <td>{(b.battery_sensitivity * 100).toFixed(0)}%</td>
+          </tr>
+          <tr>
+            <td>Stacked-coin emergency catch</td>
+            <td>{(h.stacked_coin_emergency_rate * 100).toFixed(0)}%</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>Coin sensitivity</td>
+            <td>{(h.coin_sensitivity * 100).toFixed(0)}%</td>
+            <td>{(b.coin_sensitivity * 100).toFixed(0)}%</td>
+          </tr>
+        </tbody>
+      </table>
 
-      <section>
-        <h2>2. Radial Profiling Validation</h2>
-        <p>
-          The CV branch&apos;s radial intensity profiles separate battery halos from coin discs on synthetic
-          holdout. Stacked coins occupy an ambiguous zone—validating the conservative emergency policy.
-        </p>
-        <figure className="research-figure">
-          <Image
-            src="/figures/methodology/radial_comparison.png"
-            alt="Radial profile comparison"
-            width={700}
-            height={420}
-            className="figure-img"
-            unoptimized
-            style={{ width: "100%", height: "auto", border: "1px solid #ccc" }}
-          />
-          <p className="figure-caption">
-            <strong>Figure 6.</strong> Radial profiles by class. See{" "}
-            <Link href="/methodology">methodology</Link> for halo score table.
-          </p>
-        </figure>
-      </section>
+      <Image
+        src="/figures/validation/benchmark.png"
+        alt="Benchmark chart"
+        width={640}
+        height={400}
+        className="figure-img"
+        unoptimized
+      />
 
-      <section>
-        <h2>3. Benchmark Results</h2>
-        <p className="caption">
-          Synthetic holdout, n = {h.n_per_class} per class. Compared against Rostad et al., Emory SPR 2020.
-        </p>
-
-        <figure className="research-figure">
-          <Image
-            src="/figures/validation/benchmark.png"
-            alt="Benchmark comparison chart"
-            width={700}
-            height={420}
-            className="figure-img"
-            unoptimized
-            style={{ width: "100%", height: "auto", border: "1px solid #ccc" }}
-          />
-          <p className="figure-caption">
-            <strong>Figure 4.</strong> Haloscan vs. Emory 2020 baseline on battery sensitivity, coin sensitivity,
-            and stacked-coin emergency catch rate. Haloscan prioritizes battery sensitivity (100% vs. 81%) at the
-            cost of some coin specificity—a deliberate clinical trade-off.
-          </p>
-        </figure>
-
-        <table className="data">
-          <thead>
-            <tr>
-              <th>Metric</th>
-              <th>Haloscan</th>
-              <th>Emory 2020</th>
-              <th>Δ</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Battery sensitivity</td>
-              <td className="num">
-                <strong>{(h.battery_sensitivity * 100).toFixed(1)}%</strong>
-              </td>
-              <td className="num">{(b.battery_sensitivity * 100).toFixed(1)}%</td>
-              <td className="num">
-                <strong>+{((h.battery_sensitivity - b.battery_sensitivity) * 100).toFixed(1)} pp</strong>
-              </td>
-            </tr>
-            <tr>
-              <td>Coin sensitivity</td>
-              <td className="num">{(h.coin_sensitivity * 100).toFixed(1)}%</td>
-              <td className="num">{(b.coin_sensitivity * 100).toFixed(1)}%</td>
-              <td className="num">{((h.coin_sensitivity - b.coin_sensitivity) * 100).toFixed(1)} pp</td>
-            </tr>
-            <tr>
-              <td>Stacked-coin emergency catch</td>
-              <td className="num">
-                <strong>{(h.stacked_coin_emergency_rate * 100).toFixed(1)}%</strong>
-              </td>
-              <td className="num">—</td>
-              <td className="num">Not reported in baseline</td>
-            </tr>
-            <tr>
-              <td>Overall accuracy</td>
-              <td className="num">—</td>
-              <td className="num">{(b.overall_accuracy * 100).toFixed(1)}%</td>
-              <td className="num">Different endpoint mix</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section>
-        <h2>4. Confusion Matrix</h2>
-        <p>
-          Four-class evaluation on synthetic radiographs (battery, coin, stacked coins, normal). Predictions map to
-          emergency-aware battery class when probability or heuristics trigger CRITICAL pathway.
-        </p>
-
-        <figure className="research-figure">
-          <Image
-            src="/figures/validation/confusion_matrix.png"
-            alt="Confusion matrix"
-            width={550}
-            height={480}
-            className="figure-img"
-            unoptimized
-            style={{ maxWidth: 480, height: "auto", border: "1px solid #ccc" }}
-          />
-          <p className="figure-caption">
-            <strong>Figure 5.</strong> Confusion matrix (n = {cm.n_per_class} per true class). Rows = ground truth;
-            columns = model prediction bucket.
-          </p>
-        </figure>
-
+      <ReadMore title="Confusion matrix">
+        <Image
+          src="/figures/validation/confusion_matrix.png"
+          alt="Confusion matrix"
+          width={640}
+          height={480}
+          className="figure-img"
+          unoptimized
+        />
         <table className="data">
           <thead>
             <tr>
               <th />
               {cm.classes.map((c) => (
-                <th key={c}>Pred: {c}</th>
+                <th key={c}>{c}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {cm.classes.map((rowLabel, i) => (
               <tr key={rowLabel}>
-                <td>
-                  <strong>True: {rowLabel}</strong>
-                </td>
+                <td>{rowLabel}</td>
                 {cm.matrix[i].map((val, j) => (
-                  <td key={j} className="num">
-                    {val}
-                  </td>
+                  <td key={j}>{val}</td>
                 ))}
               </tr>
             ))}
           </tbody>
         </table>
-      </section>
+      </ReadMore>
 
-      <section>
-        <h2>5. Limitations (Stated Explicitly)</h2>
-        <ul className="research">
-          <li>Evaluation uses synthetic radiographs—not a multi-site clinical trial.</li>
-          <li>Coin sensitivity (73%) is lower than Emory baseline (83%) due to conservative battery bias.</li>
-          <li>Not FDA-cleared; decision support only; requires physician oversight.</li>
-          <li>Free-tier Render hosting may cold-start (~30–60 s) after idle periods.</li>
+      <ReadMore title="Smoke tests">
+        <ul className="plain-list">
+          {smoke_tests.map((t) => (
+            <li key={t.name}>
+              <code>{t.name}</code> — {t.desc}
+            </li>
+          ))}
         </ul>
-      </section>
+        <pre>{`python3 tests/smoke_test.py
+python3 -m haloscan.evaluate --n 40`}</pre>
+      </ReadMore>
 
-      <div className="cta-row">
-        <Link href="/scan" className="btn">
-          Verify Live Inference →
-        </Link>
-        <Link href="/architecture" className="btn btn-ghost">
-          Architecture Details
-        </Link>
-      </div>
+      <ReadMore title="Limitations">
+        <ul className="plain-list">
+          <li>Synthetic radiographs only — not a multi-site clinical trial.</li>
+          <li>Conservative battery bias lowers coin sensitivity vs. Emory baseline.</li>
+          <li>Decision support only — not FDA-cleared.</li>
+        </ul>
+      </ReadMore>
+
+      <p>
+        <Link href="/scan?judge=1">Run judge demo</Link>
+      </p>
 
       <footer>
-        <span>Metrics in weights/metrics.json · Figures via export_validation_figures.py</span>
-        <Link href="/">← Home</Link>
+        <p>
+          <Link href="/">← Home</Link>
+        </p>
       </footer>
     </div>
   );

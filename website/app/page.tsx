@@ -76,19 +76,19 @@ export default function HomePage() {
             </tr>
             <tr>
               <td>Stacked-coin emergency catch</td>
-              <td>65%</td>
+              <td>75%</td>
               <td>—</td>
             </tr>
             <tr>
               <td>Coin sensitivity</td>
-              <td>73%</td>
+              <td>38%</td>
               <td>83%</td>
             </tr>
           </tbody>
         </table>
         <p className="muted">
           Haloscan deliberately biases toward battery detection — a missed battery is far costlier than unnecessary
-          endoscopy.
+          endoscopy. Lower coin sensitivity reflects this conservative policy (75% stacked-coin catch vs. prior 65%).
         </p>
       </ReadMore>
 

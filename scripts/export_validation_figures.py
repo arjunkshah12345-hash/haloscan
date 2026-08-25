@@ -140,6 +140,7 @@ def main() -> None:
         {"name": "test_halo_analyzer", "desc": "CV halo scoring (battery vs coin)"},
         {"name": "test_clinical_protocol", "desc": "CRITICAL / ROUTINE protocol engine"},
         {"name": "test_report_generation", "desc": "HTML clinical report export"},
+        {"name": "test_inference_pipeline", "desc": "Full battery / coin / stacked inference on synthetic cases"},
     ]
 
     payload = {

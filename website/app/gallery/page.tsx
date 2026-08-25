@@ -1,8 +1,10 @@
 import fs from "fs";
 import path from "path";
 import Link from "next/link";
-import { CaseFigure, type CaseId } from "@/components/CaseFigure";
+import { MinimalFigure } from "@/components/MinimalFigure";
 import { Nav } from "@/components/Nav";
+import { ReadMore } from "@/components/ReadMore";
+import type { CaseId } from "@/components/CaseFigure";
 
 type CaseMeta = {
   id: CaseId;
@@ -10,7 +12,6 @@ type CaseMeta = {
   prediction: string;
   battery_probability: number;
   coin_probability: number;
-  emergency: boolean;
   urgency: string;
   inference_ms: number;
 };
@@ -20,137 +21,61 @@ function loadManifest(): CaseMeta[] {
   return JSON.parse(fs.readFileSync(p, "utf8")) as CaseMeta[];
 }
 
-const FIGURE_META: Record<
-  CaseId,
-  { figure: string; title: string; caption: string; verdict?: string; urgency?: string }
-> = {
-  battery: {
-    figure: "Figure 1",
-    title: "Button battery — dual-view reference case",
-    verdict: "BATTERY",
-    urgency: "CRITICAL",
-    caption:
-      "AP and lateral inputs. Detection overlay marks inner halo ring. Grad-CAM attention on rim boundaries. Radial profile shows dual-peak structure.",
-  },
-  coin: {
-    figure: "Figure 3",
-    title: "Single coin — AP-only control",
-    verdict: "COIN",
-    urgency: "ROUTINE",
-    caption:
-      "Homogeneous disc without inner ring. High coin probability. Radial profile lacks battery signature.",
-  },
-  stacked: {
-    figure: "Figure 2",
-    title: "Stacked coins — false halo failure mode",
-    verdict: "BATTERY",
-    urgency: "CRITICAL (conservative)",
-    caption:
-      "Concentric rings mimic battery halo. Ensemble elevates battery probability and triggers emergency protocol despite coin-like morphology.",
-  },
-  normal: {
-    figure: "Figure 10",
-    title: "Normal study — no foreign body",
-    verdict: "Low battery probability",
-    urgency: "ROUTINE",
-    caption:
-      "Negative control. No discrete disc-shaped opacity with halo signature. Demonstrates the system does not force CRITICAL on every study.",
-  },
+const LABELS: Record<CaseId, string> = {
+  battery: "Button battery — CRITICAL",
+  stacked: "Stacked coins — false halo trap",
+  coin: "Single coin — ROUTINE",
+  normal: "Normal study — no foreign body",
 };
 
 export default function GalleryPage() {
   const cases = loadManifest();
 
   return (
-    <div className="page-wide">
+    <div className="page">
       <Nav />
 
-      <header className="doc-header">
-        <h1>Figure Gallery</h1>
-        <p className="doc-subtitle">Complete inference outputs for all reference cases</p>
-        <p className="doc-meta">
-          Every panel below is exported from the live PyTorch pipeline via{" "}
-          <code>python3 scripts/export_figures.py</code>. Metrics match the{" "}
-          <Link href="/scan">Clinical Scanner</Link> demo cases (keys 1–4).
-        </p>
-      </header>
+      <h1>Figure gallery</h1>
+      <p className="lede">All panels exported from the live PyTorch pipeline. Scanner keys 1–4 match these cases.</p>
+      <p>
+        <Link href="/scan">Open scanner</Link>
+      </p>
 
-      <section>
-        <h2>Summary Table</h2>
-        <table className="data">
-          <thead>
-            <tr>
-              <th>Case</th>
-              <th>Prediction</th>
-              <th>Battery P</th>
-              <th>Coin P</th>
-              <th>Protocol</th>
-              <th>Inference</th>
+      <table className="data">
+        <thead>
+          <tr>
+            <th>Case</th>
+            <th>Output</th>
+            <th>Battery</th>
+            <th>Coin</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cases.map((c) => (
+            <tr key={c.id}>
+              <td>{c.caption}</td>
+              <td>{c.prediction}</td>
+              <td>{(c.battery_probability * 100).toFixed(0)}%</td>
+              <td>{(c.coin_probability * 100).toFixed(0)}%</td>
             </tr>
-          </thead>
-          <tbody>
-            {cases.map((c) => (
-              <tr key={c.id}>
-                <td>
-                  <strong>{c.caption}</strong>
-                </td>
-                <td>{c.prediction}</td>
-                <td className="num">{(c.battery_probability * 100).toFixed(1)}%</td>
-                <td className="num">{(c.coin_probability * 100).toFixed(1)}%</td>
-                <td>{c.urgency}</td>
-                <td className="num">{c.inference_ms} ms</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
+          ))}
+        </tbody>
+      </table>
 
-      {cases.map((c) => {
-        const meta = FIGURE_META[c.id];
-        const panels =
-          c.id === "battery"
-            ? [
-                { src: "ap.png", label: "A. AP radiograph" },
-                { src: "lateral.png", label: "B. Lateral radiograph" },
-                { src: "overlay.png", label: "C. Detection overlay" },
-                { src: "gradcam.png", label: "D. Grad-CAM" },
-              ]
-            : undefined;
-        return (
-          <CaseFigure
-            key={c.id}
-            caseId={c.id}
-            figure={meta.figure}
-            title={meta.title}
-            caption={meta.caption}
-            verdict={meta.verdict}
-            urgency={meta.urgency}
-            panels={panels}
-          />
-        );
-      })}
+      {(["battery", "stacked", "coin", "normal"] as CaseId[]).map((id) => (
+        <MinimalFigure key={id} caseId={id} label={LABELS[id]} />
+      ))}
 
-      <section>
-        <h2>Regenerate Figures Locally</h2>
-        <pre>{`git clone https://github.com/arjunkshah12345-hash/haloscan.git
-cd haloscan && pip install -r requirements.txt
+      <ReadMore title="Regenerate locally">
+        <pre>{`pip install -r requirements.txt
 python3 scripts/export_figures.py
-python3 scripts/export_validation_figures.py
-python3 scripts/export_methodology_figures.py`}</pre>
-      </section>
-
-      <div className="cta-row">
-        <Link href="/scan" className="btn">
-          Run Live Inference →
-        </Link>
-        <Link href="/methodology" className="btn btn-ghost">
-          Methodology
-        </Link>
-      </div>
+python3 scripts/export_validation_figures.py`}</pre>
+      </ReadMore>
 
       <footer>
-        <span>Figures in website/public/figures/</span>
-        <Link href="/">← Home</Link>
+        <p>
+          <Link href="/">← Home</Link>
+        </p>
       </footer>
     </div>
   );
