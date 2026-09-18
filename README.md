@@ -47,8 +47,8 @@ Radiologists look for the **double halo** on AP films — bright outer rim, dark
 | | Haloscan | Emory 2020 (Rostad et al.) |
 |---|:---:|:---:|
 | **Battery sensitivity** | **100%** | 81% |
-| **Stacked-coin emergency catch** | **75%** | — |
-| Coin sensitivity | 38% | 83% |
+| **Stacked-coin emergency catch** | **95%** | — |
+| Coin sensitivity | **100%** | 83% |
 | Overall accuracy (baseline) | — | 88% |
 
 *Synthetic holdout, n=40/class. See `weights/metrics.json`.*

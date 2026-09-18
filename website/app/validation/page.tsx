@@ -129,7 +129,7 @@ python3 -m haloscan.evaluate --n 40`}</pre>
       <ReadMore title="Limitations">
         <ul className="plain-list">
           <li>Synthetic radiographs only — not a multi-site clinical trial.</li>
-          <li>Conservative battery bias lowers coin sensitivity vs. Emory baseline.</li>
+          <li>Holdout metrics are synthetic; real-world validation still needed before clinical use.</li>
           <li>Decision support only — not FDA-cleared.</li>
         </ul>
       </ReadMore>

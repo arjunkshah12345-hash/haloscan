@@ -26,13 +26,18 @@ def load_image(source) -> np.ndarray:
     raise TypeError(f"Unsupported image type: {type(source)}")
 
 
-def enhance_xray(gray: np.ndarray) -> np.ndarray:
+def enhance_xray(gray: np.ndarray, clip_limit: float = 2.5) -> np.ndarray:
     """CLAHE + inversion so dense objects read as bright."""
     u8 = (np.clip(gray, 0, 1) * 255).astype(np.uint8)
-    clahe = cv2.createCLAHE(clipLimit=2.5, tileGridSize=(8, 8))
+    clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=(8, 8))
     eq = clahe.apply(u8)
     inv = 255 - eq
     return inv.astype(np.float32) / 255.0
+
+
+def enhance_xray_mild(gray: np.ndarray) -> np.ndarray:
+    """Lighter CLAHE — used to reject enhancement-only false halos."""
+    return enhance_xray(gray, clip_limit=1.2)
 
 
 def to_rgb_tensor(gray: np.ndarray, size: int = 224) -> np.ndarray:

@@ -33,7 +33,7 @@ After Reese's Law (P.L. 117-171), button battery packaging became child-resistan
 
 - **HaloscanNet:** Single-view 3-block CNN (32→64→128 channels)
 - **DualViewNet:** Twin encoders + fusion MLP — lateral view reduces stacked-coin false positives
-- **Battery-weighted loss:** `CrossEntropyLoss(weights=[3.0, 1.0, 0.5])` — missing a battery costs 3× more than missing a coin
+- **Battery-weighted loss:** `CrossEntropyLoss(weights=[2.5, 1.4, 0.5])` — missing a battery costs more than missing a coin
 
 ### 3. Ensemble fusion (`inference.py`)
 

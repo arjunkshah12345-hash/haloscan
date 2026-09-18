@@ -18,3 +18,5 @@ renders/*.tmp.mp4
 renders/*.mp4
 renders/*.wav
 renders/*.log
+
+.tmp/

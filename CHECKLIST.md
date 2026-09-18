@@ -11,7 +11,7 @@
 - [x] **API (Render):** https://haloscan.onrender.com
 - [x] **Architecture / validation / gallery / methodology**
 - [x] **GitHub:** https://github.com/arjunkshah12345-hash/haloscan
-- [x] 100% battery sensitivity vs 81% Emory baseline
+- [x] 100% battery / 100% coin / 95% stacked catch vs Emory 81% battery baseline
 - [x] Render keepalive cron
 - [x] Judge demo mode + pipeline loader + metrics sidebar
 

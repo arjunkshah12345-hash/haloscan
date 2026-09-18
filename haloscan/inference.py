@@ -56,32 +56,43 @@ class HaloscanEngine:
 
         cv_normal = max(0.0, 1.0 - cv_battery - cv_coin)
 
-        bat = 0.50 * cv_battery + 0.40 * model_p.get("battery", 0) + 0.10 * (1 - model_p.get("coin", 0))
-        coin = 0.50 * cv_coin + 0.40 * model_p.get("coin", 0)
-        if dual_used:
-            bat += 0.05
+        # Ensemble: CV physics + CNN. Slight battery prior only when dual view confirms.
+        bat = 0.48 * cv_battery + 0.42 * model_p.get("battery", 0) + 0.10 * (1 - model_p.get("coin", 0))
+        coin = 0.48 * cv_coin + 0.52 * model_p.get("coin", 0)
+        if dual_used and (lat_halo is not None and lat_halo.stepoff_score > 0.35):
+            bat += 0.06
         total = bat + coin + 1e-6
         bat_n, coin_n = bat / total, coin / total
 
-        ambiguous = ap_halo.halo_score > 0.40 and (
+        ambiguous = ap_halo.halo_score > 0.42 and (
             lat_halo is None or lat_halo.stepoff_score < 0.38
         )
 
-        # Stacked coins: false halo on AP without lateral step-off (Reese's Law hard case)
+        # Strong coin: ensemble leans coin. Tolerate moderate CV halo (CLAHE noise).
+        strong_coin = coin_n >= 0.58 and ap_halo.halo_score < 0.35 and (
+            model_p.get("coin", 0) >= 0.40 or ap_halo.halo_score < 0.22
+        )
+
+        # Stacked / ambiguous: real halo evidence required (not peak noise alone)
         stacked_mimic = (
             ap_halo.stacked_mimic_score >= 0.42
-            or ap_halo.profile_peaks >= 4
             or (
                 ap_halo.center is not None
-                and ap_halo.halo_score > 0.32
+                and ap_halo.halo_score >= 0.35
+                and ap_halo.profile_peaks >= 2
                 and (lat_halo is None or lat_halo.stepoff_score < 0.35)
-                and bat_n > 0.28
             )
         )
+        if strong_coin:
+            stacked_mimic = False
+            ambiguous = False
+
+        # AP-only with strong battery-like halo → treat urgently (covers stacked mimics)
         ap_only_disc = (
             ap_halo.center is not None
             and lat_gray is None
-            and ap_halo.halo_score > 0.45
+            and ap_halo.halo_score >= 0.40
+            and not strong_coin
         )
         if stacked_mimic or ap_only_disc:
             ambiguous = True
@@ -91,11 +102,15 @@ class HaloscanEngine:
         else:
             prediction, confidence = "COIN", coin_n
 
-        if ambiguous and (bat_n > 0.35 or stacked_mimic or ap_only_disc):
+        if ambiguous and not strong_coin and (bat_n > 0.28 or stacked_mimic or ap_only_disc):
             prediction = "BATTERY — AMBIGUOUS HALO"
             confidence = max(bat_n, 0.75)
 
-        emergency = bat_n >= 0.48 or ambiguous or prediction.startswith("BATTERY")
+        emergency = (
+            bat_n >= 0.48
+            or (ambiguous and not strong_coin)
+            or (prediction.startswith("BATTERY") and not strong_coin)
+        )
 
         explanation = ap_halo.explanation
         if lat_halo is not None and lat_halo.stepoff_score > 0.42:

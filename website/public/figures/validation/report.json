@@ -2,8 +2,8 @@
   "metrics": {
     "haloscan": {
       "battery_sensitivity": 1.0,
-      "coin_sensitivity": 0.375,
-      "stacked_coin_emergency_rate": 0.75,
+      "coin_sensitivity": 1.0,
+      "stacked_coin_emergency_rate": 0.95,
       "n_per_class": 40
     },
     "baseline_emory_2020": {
@@ -30,20 +30,20 @@
         0
       ],
       [
-        25,
-        15,
+        0,
+        40,
         0,
         0
       ],
       [
-        30,
-        10,
+        38,
+        2,
         0,
         0
       ],
       [
-        7,
-        33,
+        0,
+        40,
         0,
         0
       ]

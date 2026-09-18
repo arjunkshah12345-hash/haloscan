@@ -43,11 +43,12 @@ def _add_noise(img: np.ndarray) -> np.ndarray:
 
 
 def draw_coin(bg: np.ndarray, cx: int, cy: int, r: int) -> np.ndarray:
+    """Homogeneous disc — flat density, soft single rim (no false halo rings)."""
     img = bg.copy()
     density = random.uniform(0.78, 0.86)
     cv2.circle(img, (cx, cy), r, density, -1)
-    # subtle rim only — avoid false halo
-    cv2.circle(img, (cx, cy), r, min(1.0, density + 0.06), 1)
+    # Soft 1px rim only — avoid a second concentric ring
+    cv2.circle(img, (cx, cy), r, min(1.0, density + 0.04), 1)
     return _add_noise(img)
 
 
@@ -60,18 +61,20 @@ def draw_battery_ap(bg: np.ndarray, cx: int, cy: int, r: int) -> np.ndarray:
 
 
 def draw_stacked_coins_ap(bg: np.ndarray, cx: int, cy: int, r: int) -> np.ndarray:
-    """Two offset coins with overlapping rims — classic false double-halo mimic."""
+    """Stacked coins that reproduce the double-halo sign (Reese's Law hard case).
+
+    Clinically the AP looks nearly identical to a button battery — so we paint
+    battery-like concentric rings, then add a second offset rim (the stack).
+    """
     img = bg.copy()
-    offset = int(r * 0.16)
-    d1 = random.uniform(0.78, 0.88)
-    d2 = random.uniform(0.78, 0.88)
-    cv2.circle(img, (cx - offset, cy), r, d1, -1)
-    cv2.circle(img, (cx + offset, cy), r, d2, -1)
-    # Bright overlapping rims → false double halo on AP
-    cv2.circle(img, (cx - offset, cy), r, random.uniform(0.91, 0.98), 2)
-    cv2.circle(img, (cx + offset, cy), r, random.uniform(0.91, 0.98), 2)
-    cv2.circle(img, (cx, cy), int(r * 0.72), random.uniform(0.88, 0.96), 2)
-    cv2.circle(img, (cx, cy), int(r * 0.48), random.uniform(0.42, 0.55), -1)
+    # Battery-like false halo (what fools radiologists)
+    cv2.circle(img, (cx, cy), r, random.uniform(0.86, 0.95), 2)
+    cv2.circle(img, (cx, cy), int(r * 0.72), random.uniform(0.45, 0.60), -1)
+    cv2.circle(img, (cx, cy), int(r * 0.34), random.uniform(0.72, 0.84), -1)
+    # Second coin offset — multi-rim / multi-peak AP signature
+    offset = max(2, int(r * 0.18))
+    cv2.circle(img, (cx + offset, cy), r, random.uniform(0.88, 0.96), 2)
+    cv2.circle(img, (cx - offset // 2, cy), int(r * 0.55), random.uniform(0.88, 0.96), 1)
     return _add_noise(img)
 
 

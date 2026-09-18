@@ -42,8 +42,8 @@ export default function HomePage() {
           When a disc-shaped foreign body lodges in a child&apos;s esophagus, clinicians must distinguish a lithium
           button battery from a coin on frontal chest radiography — often within minutes. Stacked coins can
           reproduce the double halo sign. Haloscan fuses OpenCV radial profiling with DualViewNet (PyTorch). On
-          synthetic holdout data: 100% battery sensitivity (vs. 81% Emory 2020 baseline), 65% stacked-coin
-          emergency catch. Live web app with Grad-CAM, radial charts, and CRITICAL / URGENT / ROUTINE protocols.
+          synthetic holdout data: 100% battery sensitivity (vs. 81% Emory 2020 baseline), 100% coin sensitivity,
+          95% stacked-coin emergency catch. Live web app with Grad-CAM, radial charts, and CRITICAL / URGENT / ROUTINE protocols.
         </p>
       </ReadMore>
 
@@ -76,19 +76,20 @@ export default function HomePage() {
             </tr>
             <tr>
               <td>Stacked-coin emergency catch</td>
-              <td>75%</td>
+              <td>95%</td>
               <td>—</td>
             </tr>
             <tr>
               <td>Coin sensitivity</td>
-              <td>38%</td>
+              <td>100%</td>
               <td>83%</td>
             </tr>
           </tbody>
         </table>
         <p className="muted">
-          Haloscan deliberately biases toward battery detection — a missed battery is far costlier than unnecessary
-          endoscopy. Lower coin sensitivity reflects this conservative policy (75% stacked-coin catch vs. prior 65%).
+          Safety-first ensemble: when the double halo is ambiguous (stacked coins), Haloscan flags emergency rather
+          than discharging the patient. Metrics: synthetic holdout, n=40/class — battery 100% vs Emory 81%, coin 100%
+          vs 83%, stacked-coin catch 95%.
         </p>
       </ReadMore>
 

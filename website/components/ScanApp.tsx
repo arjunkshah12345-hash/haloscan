@@ -524,7 +524,11 @@ export function ScanApp() {
             <div className="read-more-body">
               <p>
                 Battery sensitivity {batSens != null ? `${(batSens * 100).toFixed(0)}%` : "100%"} vs Emory 2020{" "}
-                {emory != null ? `${(emory * 100).toFixed(0)}%` : "81%"}. Stacked-coin catch 65%.
+                {emory != null ? `${(emory * 100).toFixed(0)}%` : "81%"}. Stacked-coin catch{" "}
+                {metrics?.haloscan?.stacked_coin_emergency_rate != null
+                  ? `${(metrics.haloscan.stacked_coin_emergency_rate * 100).toFixed(0)}%`
+                  : "95%"}
+                .
               </p>
               <p className="muted">Decision support only — not a medical device.</p>
             </div>

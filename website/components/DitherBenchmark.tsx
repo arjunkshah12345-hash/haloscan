@@ -15,7 +15,7 @@ type Bar = { label: string; value: number; color: string };
 const BARS: Bar[] = [
   { label: "Haloscan", value: 100, color: "#8b0000" },
   { label: "Emory 2020", value: 81, color: "#666666" },
-  { label: "Stacked catch", value: 65, color: "#1a5c1a" },
+  { label: "Stacked catch", value: 95, color: "#1a5c1a" },
 ];
 
 function fillDitherRect(
@@ -102,7 +102,7 @@ export function DitherBenchmark({ className = "" }: { className?: string }) {
     <canvas
       ref={ref}
       className={`dither-benchmark-canvas ${className}`.trim()}
-      aria-label="Benchmark chart: Haloscan 100%, Emory 81%, stacked catch 65%"
+      aria-label="Benchmark chart: Haloscan 100%, Emory 81%, stacked catch 95%"
       role="img"
     />
   );

@@ -55,12 +55,14 @@ def train_models(
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     ap_x, lat_x, y = build_dataset(dual=True)
 
-    weights = torch.tensor([3.0, 1.0, 0.5], device=device)  # battery-weighted
+    # Battery-weighted but not so aggressive that coin class collapses
+    weights = torch.tensor([2.5, 1.4, 0.5], device=device)
     criterion = nn.CrossEntropyLoss(weight=weights)
 
     # Single-view model
     single = HaloscanNet().to(device)
-    opt_s = torch.optim.AdamW(single.parameters(), lr=2e-3, weight_decay=1e-4)
+    opt_s = torch.optim.AdamW(single.parameters(), lr=1.5e-3, weight_decay=1e-4)
+    sched_s = torch.optim.lr_scheduler.CosineAnnealingLR(opt_s, T_max=max(1, epochs))
     ds = TensorDataset(ap_x, y)
     loader = DataLoader(ds, batch_size=batch_size, shuffle=True)
 
@@ -72,11 +74,13 @@ def train_models(
             loss = criterion(single(bx), by)
             loss.backward()
             opt_s.step()
+        sched_s.step()
     single.eval()
 
     # Dual-view model
     dual = DualViewNet().to(device)
-    opt_d = torch.optim.AdamW(dual.parameters(), lr=2e-3, weight_decay=1e-4)
+    opt_d = torch.optim.AdamW(dual.parameters(), lr=1.5e-3, weight_decay=1e-4)
+    sched_d = torch.optim.lr_scheduler.CosineAnnealingLR(opt_d, T_max=max(1, epochs))
     assert lat_x is not None
     ds_d = TensorDataset(ap_x, lat_x, y)
     loader_d = DataLoader(ds_d, batch_size=batch_size, shuffle=True)
@@ -89,6 +93,7 @@ def train_models(
             loss = criterion(dual(bap, blat), by)
             loss.backward()
             opt_d.step()
+        sched_d.step()
     dual.eval()
 
     return single, dual
