@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     title: "Haloscan",
     description: "Battery vs coin on pediatric chest X-rays.",
     type: "website",
-    url: "https://haloscan.ideatr.dev",
+    url: "https://haloscan-cac.vercel.app",
   },
 };
 

@@ -6,8 +6,8 @@
 
 ## Done ✅
 
-- [x] **Live scanner:** https://haloscan.ideatr.dev/scan
-- [x] **Judge auto-demo:** https://haloscan.ideatr.dev/scan?judge=1
+- [x] **Live scanner:** https://haloscan-cac.vercel.app/scan
+- [x] **Judge auto-demo:** https://haloscan-cac.vercel.app/scan?judge=1
 - [x] **API (Render):** https://haloscan.onrender.com
 - [x] **Architecture / validation / gallery / methodology**
 - [x] **GitHub:** https://github.com/arjunkshah12345-hash/haloscan
@@ -31,7 +31,7 @@
 
 ```bash
 curl https://haloscan.onrender.com/api/health
-curl -s https://haloscan.ideatr.dev/api/demo/stacked | head -c 120
+curl -s https://haloscan-cac.vercel.app/api/demo/stacked | head -c 120
 python3 tests/smoke_test.py
 cd website && vercel --prod
 ```
@@ -40,7 +40,7 @@ cd website && vercel --prod
 
 | Field | URL |
 |-------|-----|
-| Live app | https://haloscan.ideatr.dev/scan |
-| Judge demo | https://haloscan.ideatr.dev/scan?judge=1 |
-| Website | https://haloscan.ideatr.dev |
+| Live app | https://haloscan-cac.vercel.app/scan |
+| Judge demo | https://haloscan-cac.vercel.app/scan?judge=1 |
+| Website | https://haloscan-cac.vercel.app |
 | GitHub | https://github.com/arjunkshah12345-hash/haloscan |

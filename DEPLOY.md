@@ -1,10 +1,10 @@
 # Haloscan — Production Deployment
 
-**Status: LIVE** (Aug 2026)
+**Status: LIVE** — primary URL `https://haloscan-cac.vercel.app` (ideatr.dev domain expired Aug 31 2026; renew to restore haloscan.ideatr.dev)
 
 | Layer | URL | Host |
 |-------|-----|------|
-| **Frontend** | https://haloscan.ideatr.dev/scan | Vercel |
+| **Frontend** | https://haloscan-cac.vercel.app/scan | Vercel |
 | **API** | https://haloscan.onrender.com | Render (Docker, free tier) |
 | **Source** | https://github.com/arjunkshah12345-hash/haloscan | GitHub |
 
@@ -15,7 +15,7 @@ Vercel proxies `/api/*` → Render via `HALOSCAN_API_URL`.
 ## Architecture
 
 ```
-haloscan.ideatr.dev/scan
+haloscan-cac.vercel.app/scan
         │
         ▼  (HALOSCAN_API_URL)
 https://haloscan.onrender.com/api/*
@@ -43,7 +43,7 @@ render deploys create srv-da4tc1jm8hqs73anthk0 --wait --confirm
 
 ## Vercel frontend
 
-Custom domain: **haloscan.ideatr.dev** (Vercel DNS on ideatr.dev)
+Custom domain: **haloscan-cac.vercel.app** (Vercel DNS on ideatr.dev)
 
 ```bash
 cd website
@@ -57,9 +57,9 @@ vercel --prod --yes
 
 ```bash
 curl https://haloscan.onrender.com/api/health
-curl https://haloscan.ideatr.dev/api/health
-curl https://haloscan.ideatr.dev/api/demo/battery
-open https://haloscan.ideatr.dev/scan
+curl https://haloscan-cac.vercel.app/api/health
+curl https://haloscan-cac.vercel.app/api/demo/battery
+open https://haloscan-cac.vercel.app/scan
 ```
 
 ---

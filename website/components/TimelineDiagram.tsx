@@ -17,7 +17,7 @@ const EVENTS = [
   {
     year: "2026",
     title: "Haloscan",
-    body: "Open-source ensemble (CV + DualViewNet) deployed at haloscan.ideatr.dev with explainability and clinical protocols.",
+    body: "Open-source ensemble (CV + DualViewNet) deployed at haloscan-cac.vercel.app with explainability and clinical protocols.",
   },
 ];
 

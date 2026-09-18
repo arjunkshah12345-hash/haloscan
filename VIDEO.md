@@ -27,7 +27,7 @@ Optional auto-narration (skip if you're voicing): `python3 scripts/manim_halosca
 
 ## Live screen recording (backup)
 
-Record **https://haloscan.ideatr.dev/scan** — keys **1** and **3**.
+Record **https://haloscan-cac.vercel.app/scan** — keys **1** and **3**.
 
 ---
 

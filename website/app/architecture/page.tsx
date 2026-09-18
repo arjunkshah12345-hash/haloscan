@@ -43,7 +43,7 @@ Stacked-coin rule:
 
       <ReadMore title="Deployment">
         <ul className="plain-list">
-          <li>Frontend: Vercel — haloscan.ideatr.dev</li>
+          <li>Frontend: Vercel — haloscan-cac.vercel.app</li>
           <li>API: Render Docker — haloscan.onrender.com</li>
           <li>Weights: weights/haloscan.pt (~3.5 MB, bundled)</li>
           <li>CI: GitHub Actions — tests/smoke_test.py on every push</li>
