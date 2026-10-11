@@ -23,9 +23,9 @@ function loadManifest(): CaseMeta[] {
 
 const LABELS: Record<CaseId, string> = {
   battery: "Synthetic button battery",
-  stacked: "Stacked coins — false halo trap",
-  coin: "Single coin — ROUTINE",
-  normal: "Normal study — no foreign body",
+  stacked: "Synthetic stacked coins",
+  coin: "Synthetic coin",
+  normal: "Synthetic background",
 };
 
 export default function GalleryPage() {

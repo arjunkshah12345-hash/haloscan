@@ -8,14 +8,15 @@ export default function HomePage() {
     <div className="page">
       <Nav current="home" />
 
+      <p className="kicker">Congressional App Challenge 2026 · experimental prototype</p>
       <h1>HaloScan</h1>
       <p className="lede">
-        An experimental research prototype that studies how a synthetic-trained model and a radial halo
-        detector describe button-battery-like and coin-like discs on X-ray-style images.
+        A radial measurement and a small dual-view network, scored on drawn X-rays. Not a diagnosis.
       </p>
       <p>
-        Suspected button-battery ingestion needs emergency care regardless of anything this app shows. HaloScan
-        does not diagnose, rule out a battery, or recommend discharge.
+        Suspected button-battery ingestion needs emergency care regardless of this app. HaloScan does not
+        diagnose, rule out a battery, or recommend discharge. Hotline{" "}
+        <a href="tel:18004988666">1-800-498-8666</a>.
       </p>
       <p>
         <Link href="/scan">Open live scanner</Link>
@@ -66,15 +67,42 @@ export default function HomePage() {
         </p>
       </ReadMore>
 
-      <ReadMore title="What the measurements are">
-        <p>
-          The numbers in this repository come from the same kind of drawn images the model trained on, plus a
-          shifted synthetic set. They are not a clinical trial and they are not a head-to-head with the Emory 2020
-          YOLOv2 study on 228 real radiographs. See the <Link href="/validation">evaluation</Link> page for the
-          reproducible report, including Wilson intervals. A point estimate of 100% on 40 synthetic images is not
-          certainty.
-        </p>
-      </ReadMore>
+      <h2>What the holdout actually did</h2>
+      <p className="muted">
+        Forty synthetic images per class, 11 October 2026. Same generator family as training. Not a clinical
+        study, and not a comparison with the Emory 2020 radiograph paper.
+      </p>
+      <table className="data">
+        <thead>
+          <tr>
+            <th>Setup</th>
+            <th>Battery flag</th>
+            <th>Coin-like</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Frontal image only</td>
+            <td>40/40</td>
+            <td>40/40</td>
+          </tr>
+          <tr>
+            <td>Frontal plus a separate drawn lateral</td>
+            <td>40/40</td>
+            <td>0/40</td>
+          </tr>
+          <tr>
+            <td>Classical CV only</td>
+            <td>5/40</td>
+            <td>40/40</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        The network follows rings. A second synthetic view made it call every coin a battery. The classical
+        branch still separated coins, and barely caught batteries. Wilson 95% for 40/40 starts near 91%.{" "}
+        <Link href="/validation">Full report</Link>.
+      </p>
 
       <ReadMore title="How it works">
         <p>
@@ -98,7 +126,7 @@ export default function HomePage() {
             <Link href="/gallery">Figure gallery</Link>
           </li>
           <li>
-            <Link href="/use-cases">Clinical use cases</Link>
+            <Link href="/use-cases">Synthetic examples</Link>
           </li>
           <li>
             <Link href="/judges">Judge verification guide</Link>
@@ -125,7 +153,7 @@ export default function HomePage() {
       </ReadMore>
 
       <footer>
-        <p>Decision support only — not a medical device · No patient data stored</p>
+        <p>Experimental prototype. Not a medical device. No patient images are stored.</p>
       </footer>
     </div>
   );

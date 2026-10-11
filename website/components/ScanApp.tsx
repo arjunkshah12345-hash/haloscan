@@ -88,6 +88,16 @@ function sourceLabel(r: Result): string {
   return `Unlabeled result · ${r.inference_ms.toFixed(0)} ms`;
 }
 
+function safeNotes(actions: string[] | undefined): string[] {
+  const banned = /\b(discharge|npo|endoscop|surgery|two-hour|2-hour|treat as battery)\b/i;
+  const kept = (actions || []).filter((line) => !banned.test(line));
+  if (kept.length > 0) return kept;
+  return [
+    "Scores are uncalibrated outputs of an experimental model trained on synthetic discs.",
+    "A coin-like or no-disc result does not rule out a button battery.",
+  ];
+}
+
 export function ScanApp() {
   const searchParams = useSearchParams();
   const judgeMode = searchParams.get("judge") === "1";
@@ -406,7 +416,7 @@ export function ScanApp() {
             {!latPreview ? (
               <>
                 <strong>Lateral radiograph</strong>
-                <span className="dropzone-hint">Optional · dual-view fusion</span>
+                <span className="dropzone-hint">Optional. A second view is fused, not assumed to help.</span>
               </>
             ) : (
               <img src={latPreview} alt="Lateral" />
@@ -435,9 +445,9 @@ export function ScanApp() {
           ) : (
             <>
               <div className="verdict-badges">
-                {r.emergency && <span className="badge badge-critical">EMERGENCY</span>}
-                {r.ambiguous && <span className="badge badge-ambiguous">Ambiguous halo</span>}
-                {r.dual_view_used && <span className="badge badge-dual">Dual-view fusion</span>}
+                {r.emergency && <span className="badge badge-critical">Research flag</span>}
+                {r.ambiguous && <span className="badge badge-ambiguous">Ambiguous pattern</span>}
+                {r.dual_view_used && <span className="badge badge-dual">Dual-view used</span>}
                 <span className={`badge ${r.inference_source === "live" ? "badge-live" : "badge-ambiguous"}`}>{sourceLabel(r)}</span>
               </div>
 
@@ -468,19 +478,81 @@ export function ScanApp() {
                 </div>
               )}
 
+              <div className="ensemble-grid ensemble-grid-open">
+                <div>
+                  <span className="ensemble-label">Classical CV</span>
+                  {(r.cv_probs.battery * 100).toFixed(0)}% battery-like
+                  <span className="ensemble-sub">{(r.cv_probs.coin * 100).toFixed(0)}% coin-like</span>
+                </div>
+                <div>
+                  <span className="ensemble-label">Neural net</span>
+                  {((r.model_probs.battery ?? 0) * 100).toFixed(0)}% battery-like
+                  <span className="ensemble-sub">{((r.model_probs.coin ?? 0) * 100).toFixed(0)}% coin-like</span>
+                </div>
+                <div>
+                  <span className="ensemble-label">Fused score</span>
+                  {(r.battery_probability * 100).toFixed(0)}% battery-like
+                  <span className="ensemble-sub">Uncalibrated · not a probability</span>
+                </div>
+              </div>
+
               <div className="prob-row">
-                <span>Battery</span>
+                <span>Battery-like</span>
                 <div className="bar-track">
                   <div className="bar-fill bar-bat" style={{ width: `${r.battery_probability * 100}%` }} />
                 </div>
                 <span>{(r.battery_probability * 100).toFixed(0)}%</span>
               </div>
               <div className="prob-row">
-                <span>Coin</span>
+                <span>Coin-like</span>
                 <div className="bar-track">
                   <div className="bar-fill bar-coin" style={{ width: `${r.coin_probability * 100}%` }} />
                 </div>
                 <span>{(r.coin_probability * 100).toFixed(0)}%</span>
+              </div>
+
+              <div className="branch-meters" aria-label="Classical and network scores">
+                <div>
+                  <span className="ensemble-label">Classical CV · battery</span>
+                  <div className="bar-track">
+                    <div className="bar-fill bar-cv" style={{ width: `${r.cv_probs.battery * 100}%` }} />
+                  </div>
+                  <span className="meter-value">{(r.cv_probs.battery * 100).toFixed(0)}%</span>
+                </div>
+                <div>
+                  <span className="ensemble-label">CNN · battery</span>
+                  <div className="bar-track">
+                    <div className="bar-fill bar-cnn" style={{ width: `${(r.model_probs.battery ?? 0) * 100}%` }} />
+                  </div>
+                  <span className="meter-value">{((r.model_probs.battery ?? 0) * 100).toFixed(0)}%</span>
+                </div>
+              </div>
+
+              <div className="img-grid">
+                {r.overlay_b64 && (
+                  <figure>
+                    <figcaption>Detected region</figcaption>
+                    <img src={r.overlay_b64} alt="Detected disc overlay" />
+                  </figure>
+                )}
+                {r.gradcam_b64 && (
+                  <figure>
+                    <figcaption>Grad-CAM</figcaption>
+                    <img src={r.gradcam_b64} alt="Grad-CAM heatmap for the battery class" />
+                  </figure>
+                )}
+                {r.radial_chart_b64 && (
+                  <figure>
+                    <figcaption>Radial intensity</figcaption>
+                    <img src={r.radial_chart_b64} alt="Radial intensity profile" />
+                  </figure>
+                )}
+                {apPreview && (
+                  <figure>
+                    <figcaption>Original AP</figcaption>
+                    <img src={apPreview} alt="Original frontal synthetic image" />
+                  </figure>
+                )}
               </div>
 
               <p className="explanation">{r.explanation}</p>
@@ -498,44 +570,11 @@ export function ScanApp() {
               </details>
 
               <details className="scan-details">
-                <summary>Ensemble breakdown</summary>
-                <div className="ensemble-grid">
-                  <div>
-                    <span className="ensemble-label">CV branch</span>
-                    {(r.cv_probs.battery * 100).toFixed(0)}% battery
-                  </div>
-                  <div>
-                    <span className="ensemble-label">CNN branch</span>
-                    {((r.model_probs.battery ?? 0) * 100).toFixed(0)}% battery
-                  </div>
-                  <div>
-                    <span className="ensemble-label">Fused</span>
-                    {(r.battery_probability * 100).toFixed(0)}% battery
-                  </div>
-                </div>
-              </details>
-
-              <div className="img-grid">
-                <figure>
-                  <figcaption>Detection overlay</figcaption>
-                  <img src={r.overlay_b64} alt="Overlay" />
-                </figure>
-                <figure>
-                  <figcaption>Grad-CAM</figcaption>
-                  <img src={r.gradcam_b64} alt="Grad-CAM" />
-                </figure>
-                <figure>
-                  <figcaption>Radial profile</figcaption>
-                  <img src={r.radial_chart_b64} alt="Radial" />
-                </figure>
-              </div>
-
-              <details className="scan-details">
                 <summary>Research readout — {researchLabel(r)}</summary>
                 <div className="protocol">
                   <p className="protocol-window">{r.protocol.time_window}</p>
                   <ul>
-                    {r.protocol.actions.map((a) => (
+                    {safeNotes(r.protocol.actions).map((a) => (
                       <li key={a}>{a}</li>
                     ))}
                   </ul>

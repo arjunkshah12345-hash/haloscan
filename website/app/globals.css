@@ -39,9 +39,9 @@ button {
 }
 
 .page {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 32px 24px 80px;
+  padding: 40px 28px 88px;
 }
 
 nav {
@@ -63,10 +63,19 @@ nav a[aria-current="page"] {
 }
 
 h1 {
-  font-size: 26px;
+  font-size: 2.5rem;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
   margin: 0 0 16px;
+}
+
+.kicker {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin: 0 0 10px;
 }
 
 h2 {
@@ -321,6 +330,9 @@ footer p {
 .architecture-diagram {
   margin: 16px 0;
   overflow-x: auto;
+  background: #f3efe6;
+  color: #1a140e;
+  padding: 12px;
 }
 
 .architecture-diagram svg {

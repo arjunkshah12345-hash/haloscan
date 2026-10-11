@@ -23,7 +23,9 @@ export default function MethodologyPage() {
       <Nav />
 
       <h1>Methodology</h1>
-      <p className="lede">Procedurally generated pediatric radiographs — no PHI. Reproducible by any judge with one command.</p>
+      <p className="lede">
+        Procedural images, not patient films. A judge can rerun the evaluation. The app does not decide care.
+      </p>
 
       <Image
         src="/figures/methodology/class_samples.png"

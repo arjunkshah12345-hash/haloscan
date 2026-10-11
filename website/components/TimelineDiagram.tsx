@@ -7,7 +7,7 @@ const EVENTS = [
   {
     year: "2020",
     title: "Emory ML baseline",
-    body: "Rostad et al. publish YOLOv2 classifier on 228 radiographs — 81% battery sensitivity. Never deployed clinically.",
+    body: "Rostad et al. report a YOLOv2 model on 228 radiographs. Different images. Not a score this prototype is compared against.",
   },
   {
     year: "2022",
@@ -17,7 +17,7 @@ const EVENTS = [
   {
     year: "2026",
     title: "Haloscan",
-    body: "Open-source ensemble (CV + DualViewNet) deployed at haloscan-cac.vercel.app with explainability and clinical protocols.",
+    body: "Experimental prototype: radial profiles plus a small dual-view network. Synthetic evaluation only. Not a clinical protocol.",
   },
 ];
 

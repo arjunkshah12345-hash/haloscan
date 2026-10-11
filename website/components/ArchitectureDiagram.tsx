@@ -4,7 +4,7 @@ export function ArchitectureDiagram() {
       <svg viewBox="0 0 820 420" role="img" aria-label="Haloscan system architecture">
         <defs>
           <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-            <path d="M0,0 L6,3 L0,6 Z" fill="#111" />
+            <path d="M0,0 L6,3 L0,6 Z" fill="#d6a15a" />
           </marker>
         </defs>
 
@@ -96,7 +96,7 @@ export function ArchitectureDiagram() {
           "Grad-CAM heatmap",
           "Detection overlay",
           "Radial profile chart",
-          "CRITICAL / URGENT / ROUTINE",
+          "Research label and uncertainty",
           "Printable HTML report",
         ].map((line, i) => (
           <text
