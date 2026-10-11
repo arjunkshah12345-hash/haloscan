@@ -1,4 +1,7 @@
 {
+  "clinical_accuracy": false,
+  "beats_baseline_battery_sensitivity": false,
+  "comparison_note": "Superseded by docs/eval/eval_report.json. The figures below are the older point estimates. They are not clinical accuracy and were not reproduced when a synthetic lateral was attached (coin-pattern rate 0.0 on the 2026-10-11 holdout).",
   "haloscan": {
     "battery_sensitivity": 1.0,
     "coin_sensitivity": 1.0,

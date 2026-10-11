@@ -3,16 +3,31 @@ from __future__ import annotations
 import io
 import json
 import time
+from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 import cv2
 import numpy as np
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, Request, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from PIL import Image
+
+Image.MAX_IMAGE_PIXELS = 16_000_000
+MAX_UPLOAD_BYTES = 8 * 1024 * 1024
+MAX_EDGE = 1024
+ALLOWED_TYPES = {
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+    "image/webp",
+    "image/bmp",
+    "image/tiff",
+    "application/octet-stream",
+}
+_HITS: dict[str, deque] = defaultdict(deque)
 
 from haloscan.evaluate import evaluate_on_synthetic
 from haloscan.inference import get_engine
@@ -35,18 +50,93 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Haloscan API", version="2.3.0", lifespan=lifespan)
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+app = FastAPI(
+    title="Haloscan API",
+    version="2.4.0",
+    description="Experimental research prototype. Not a medical device.",
+    lifespan=lifespan,
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://haloscan-cac.vercel.app",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:7860",
+        "http://127.0.0.1:7860",
+    ],
+    allow_origin_regex=r"https://haloscan[a-z0-9-]*\.vercel\.app",
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
+)
+
+
+def _client_key(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()[:80] or "unknown"
+    if request.client:
+        return request.client.host
+    return "unknown"
+
+
+def _limit(request: Request, bucket: str, limit: int = 30, window: float = 60.0) -> None:
+    now = time.time()
+    key = f"{bucket}:{_client_key(request)}"
+    hits = _HITS[key]
+    while hits and now - hits[0] > window:
+        hits.popleft()
+    if len(hits) >= limit:
+        raise HTTPException(429, "Too many requests. Wait a minute and try again.")
+    hits.append(now)
+
+
+def decode_image_bytes(data: bytes, content_type: str | None) -> np.ndarray:
+    if content_type and content_type.split(";")[0].strip().lower() not in ALLOWED_TYPES:
+        raise HTTPException(415, "Upload a PNG, JPEG, or WebP image.")
+    if not data:
+        raise HTTPException(400, "Empty upload.")
+    if len(data) > MAX_UPLOAD_BYTES:
+        raise HTTPException(413, "Image too large (max 8 MB).")
+    try:
+        probe = Image.open(io.BytesIO(data))
+        probe.verify()
+        img = Image.open(io.BytesIO(data))
+        img = img.convert("RGB")
+        if max(img.size) > MAX_EDGE:
+            img.thumbnail((MAX_EDGE, MAX_EDGE))
+        return np.array(img)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(400, "Could not read that file as an image.") from exc
 
 
 def _read_upload(f: UploadFile | None) -> np.ndarray | None:
     if f is None:
         return None
-    data = f.file.read()
-    if len(data) > 20 * 1024 * 1024:
-        raise HTTPException(413, "Image too large (max 20 MB)")
-    img = Image.open(io.BytesIO(data)).convert("RGB")
-    return np.array(img)
+    data = f.file.read(MAX_UPLOAD_BYTES + 1)
+    if not data:
+        return None
+    return decode_image_bytes(data, f.content_type)
+
+
+def _public_result(result, *, source: str, synthetic: bool) -> dict:
+    payload = result.to_dict()
+    payload["inference_source"] = source
+    payload["synthetic_demo"] = synthetic
+    payload["scores_are_calibrated_probabilities"] = False
+    payload["clinical_use"] = "not_a_diagnosis"
+    return payload
+
+
+def _safe_analyze(ap_img, lat_img):
+    try:
+        return get_engine().analyze(ap_img, lat_img)
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(500, "Analysis failed. The image could not be processed.")
 
 
 def _demo_spec(case: str) -> tuple[int, bool]:
@@ -101,34 +191,48 @@ async def root():
 
 @app.post("/api/analyze")
 async def analyze(
+    request: Request,
     ap: UploadFile = File(...),
     lateral: UploadFile | None = File(None),
 ):
+    _limit(request, "analyze", limit=20)
     ap_img = _read_upload(ap)
     if ap_img is None:
         raise HTTPException(400, "AP image required")
     lat_img = _read_upload(lateral)
-    result = get_engine().analyze(ap_img, lat_img)
-    return result.to_dict()
+    return _public_result(_safe_analyze(ap_img, lat_img), source="live", synthetic=False)
 
 
 @app.post("/api/report")
 async def report(
+    request: Request,
     ap: UploadFile = File(...),
     lateral: UploadFile | None = File(None),
 ):
+    _limit(request, "report", limit=10)
     ap_img = _read_upload(ap)
     if ap_img is None:
         raise HTTPException(400, "AP image required")
     lat_img = _read_upload(lateral)
-    result = get_engine().analyze(ap_img, lat_img)
+    result = _safe_analyze(ap_img, lat_img)
     html = generate_html_report(result)
     return HTMLResponse(html, headers={"Content-Disposition": "attachment; filename=haloscan-report.html"})
 
 
 @app.get("/api/demo/{case}")
-async def demo(case: str):
-    return _run_demo(case).to_dict()
+async def demo(request: Request, case: str):
+    _limit(request, "demo", limit=40)
+    try:
+        result = _run_demo(case)
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(500, "Demo inference failed.")
+    payload = _public_result(result, source="live", synthetic=True)
+    payload["synthetic_label"] = (
+        "Procedural synthetic radiograph. Not a patient image and not a new clinical study."
+    )
+    return payload
 
 
 @app.get("/api/demo/{case}/previews")
@@ -158,32 +262,32 @@ async def cases():
             "id": "battery",
             "title": "Button battery",
             "subtitle": "AP + lateral",
-            "description": "Classic double halo with lateral step-off morphology",
-            "urgency": "critical",
+            "description": "Synthetic double halo with a separate synthetic lateral. Research example only.",
+            "urgency": "battery-like",
             "shortcut": "1",
         },
         {
             "id": "coin",
             "title": "Single coin",
             "subtitle": "AP only",
-            "description": "Homogeneous disc density without step-off",
-            "urgency": "routine",
+            "description": "Synthetic flat disc. A coin-like score does not rule out a battery.",
+            "urgency": "coin-like",
             "shortcut": "2",
         },
         {
             "id": "stacked",
             "title": "Stacked coins",
             "subtitle": "Hard case",
-            "description": "False double halo — must still trigger emergency protocol",
-            "urgency": "critical",
+            "description": "Synthetic stacked coins that copy the halo. Ambiguity is a research flag, not a treatment order.",
+            "urgency": "ambiguous",
             "shortcut": "3",
         },
         {
             "id": "normal",
             "title": "Normal study",
             "subtitle": "No foreign body",
-            "description": "Negative pediatric chest radiograph",
-            "urgency": "routine",
+            "description": "Synthetic background with no disc. Not a negative clinical study.",
+            "urgency": "no-disc",
             "shortcut": "4",
         },
     ]
@@ -211,8 +315,9 @@ async def health():
     bundled = _bundled_metrics()
     return {
         "status": "ok",
-        "version": "2.3.0",
+        "version": "2.4.0",
         "model": "loaded",
+        "positioning": "experimental_research_prototype",
         "weights": "bundled" if (ROOT / "weights" / "haloscan.pt").exists() else "custom",
         "metrics": bundled is not None,
     }

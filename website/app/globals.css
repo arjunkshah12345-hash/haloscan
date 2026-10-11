@@ -1,9 +1,10 @@
 :root {
-  --bg: #ffffff;
-  --text: #111111;
-  --muted: #666666;
-  --line: #dddddd;
-  --serif: "Times New Roman", Times, Georgia, serif;
+  --bg: #121418;
+  --text: #ece8e1;
+  --muted: #b0a89c;
+  --line: #343842;
+  --accent: #d6a15a;
+  --serif: "Iowan Old Style", Palatino, "Palatino Linotype", Georgia, serif;
   --mono: "Courier New", Courier, monospace;
 }
 
@@ -227,14 +228,14 @@ table.data th {
 code {
   font-family: var(--mono);
   font-size: 14px;
-  background: #f5f5f5;
+  background: #1c1f26;
   padding: 1px 4px;
 }
 
 pre {
   font-family: var(--mono);
   font-size: 14px;
-  background: #f5f5f5;
+  background: #1c1f26;
   border: 1px solid var(--line);
   padding: 14px;
   overflow-x: auto;

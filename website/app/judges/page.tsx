@@ -6,72 +6,49 @@ export default function JudgesPage() {
   return (
     <div className="page">
       <Nav current="judges" />
-
       <header className="doc-header">
-        <h1>Judge verification</h1>
-        <p className="doc-subtitle">Congressional App Challenge 2026</p>
+        <h1>Two-minute judge path</h1>
+        <p className="doc-subtitle">Congressional App Challenge 2026 · experimental prototype</p>
       </header>
 
       <p>
-        <Link href="/scan?judge=1">Run the 90-second judge demo</Link> — auto-runs Case 1 (battery) then Case 3
-        (stacked coins). Real PyTorch inference on the cloud API.
+        <Link href="/scan?judge=1">Open the scanner in judge mode</Link>. It runs two synthetic cases through the
+        model when the API is awake. If the API is down, the same screen says the result is a prerecorded synthetic
+        demo and does not pretend a new forward pass happened.
       </p>
 
-      <ReadMore title="Quick verification steps">
+      <ReadMore title="What to look at">
         <ol className="research">
           <li>
-            Open <Link href="/scan?judge=1">/scan?judge=1</Link> or press key <strong>1</strong>. Confirm CRITICAL
-            protocol with two-hour window.
+            Case 1, key <strong>1</strong>: a drawn button battery plus a drawn lateral. Check the source badge
+            (live or prerecorded), the radial chart, Grad-CAM, and the separate CV and CNN scores.
           </li>
           <li>
-            Press key <strong>3</strong> (stacked coins). Confirm battery emergency despite coin-like appearance.
+            Case 3, key <strong>3</strong>: stacked coins drawn to copy the halo. Compare the ambiguity flag with
+            case 1. The flag is not a treatment order.
           </li>
-          <li>Inspect Grad-CAM, detection overlay, and radial profile in the results.</li>
           <li>
-            Clone repo and run <code>python3 tests/smoke_test.py</code> — all checks pass.
+            Case 2, key <strong>2</strong>: a flat coin. A coin-like score does not rule out a battery.
+          </li>
+          <li>
+            Read <Link href="/architecture">the model page</Link> for the real layer sizes and fusion weights, and{" "}
+            <Link href="/validation">the evaluation page</Link> for the synthetic holdout, the shifted set, and the
+            ablations.
           </li>
         </ol>
       </ReadMore>
 
-      <ReadMore title="Rubric mapping">
-        <h3>Problem</h3>
+      <ReadMore title="What this is not">
         <p>
-          Reese&apos;s Law fixed prevention; Haloscan addresses diagnosis — stacked coins mimicking the double halo
-          sign, two-hour esophageal emergency window.
+          HaloScan is not a medical device, not FDA-cleared, and not a substitute for emergency care. Suspected
+          button-battery ingestion needs a professional evaluation regardless of the score. Reese&apos;s Law (Public
+          Law 117-171) is a packaging and compartment statute. The National Battery Ingestion Hotline is
+          1-800-498-8666.
         </p>
-        <h3>Implementation</h3>
         <p>
-          Live web demo with real PyTorch inference, dual-view upload, Grad-CAM, clinical reports. Deployed on Vercel
-          + Render.
+          Older pages in this project compared a synthetic point estimate with an Emory 2020 study on real
+          radiographs. Those datasets are not comparable, and this release does not claim to outperform that study.
         </p>
-        <h3>Technical depth</h3>
-        <p>
-          OpenCV radial profiling + DualViewNet fusion. Kaggle CPU training, bundled weights, smoke tests, MIT license.
-          100% battery sensitivity on synthetic holdout vs. 81% Emory baseline.
-        </p>
-      </ReadMore>
-
-      <ReadMore title="Site map">
-        <ul className="plain-list">
-          <li>
-            <Link href="/scan?judge=1">/scan?judge=1</Link> — auto demo
-          </li>
-          <li>
-            <Link href="/scan">/scan</Link> — live scanner
-          </li>
-          <li>
-            <Link href="/gallery">/gallery</Link> — all figures
-          </li>
-          <li>
-            <Link href="/validation">/validation</Link> — benchmarks
-          </li>
-          <li>
-            <Link href="/methodology">/methodology</Link> — training data
-          </li>
-          <li>
-            <Link href="/architecture">/architecture</Link> — system design
-          </li>
-        </ul>
       </ReadMore>
 
       <footer>

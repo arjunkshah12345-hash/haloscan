@@ -5,139 +5,256 @@ import Image from "next/image";
 import { Nav } from "@/components/Nav";
 import { ReadMore } from "@/components/ReadMore";
 
-type ValidationReport = {
-  metrics: {
-    haloscan: {
-      battery_sensitivity: number;
-      coin_sensitivity: number;
-      stacked_coin_emergency_rate: number;
-      n_per_class: number;
-    };
-    baseline_emory_2020: {
-      battery_sensitivity: number;
-      coin_sensitivity: number;
-      overall_accuracy: number;
-    };
-  };
-  confusion_matrix: {
-    classes: string[];
-    matrix: number[][];
-    n_per_class: number;
-  };
-  smoke_tests: { name: string; desc: string }[];
+type Rate = { count: number; n: number; rate: number | null; wilson95: [number, number] };
+
+type Ablation = {
+  name: string;
+  mode: string;
+  lateral: boolean;
+  note?: string;
+  battery_research_flag_sensitivity: Rate;
+  coin_pattern_rate: Rate;
+  stacked_research_flag_rate: Rate;
 };
 
-function loadReport(): ValidationReport {
-  const p = path.join(process.cwd(), "public/figures/validation/report.json");
-  return JSON.parse(fs.readFileSync(p, "utf8")) as ValidationReport;
+type EvalReport = {
+  disclaimer: string;
+  definitions: Record<string, string>;
+  dataset: {
+    holdout_n_per_class: number;
+    shift_n_per_class: number;
+    holdout_description: string;
+    shift_description: string;
+    pairing: string;
+    leakage: string;
+    real_radiographs: string;
+  };
+  holdout_ensemble: {
+    battery_research_flag_sensitivity: Rate;
+    coin_pattern_rate: Rate;
+    stacked_research_flag_rate: Rate;
+    normal_false_research_flag_rate: Rate;
+    battery_flag_vs_coin_and_normal: {
+      tp: number;
+      fp: number;
+      fn: number;
+      tn: number;
+      precision: number;
+      recall: number;
+      specificity: number;
+      f1: number;
+      note: string;
+    };
+    confusion: { true_labels: string[]; predicted_buckets: string[]; matrix: number[][] };
+    failures: { failure: string; label: string; index: number; prediction: string }[];
+  };
+  shifted_ensemble: {
+    battery_research_flag_sensitivity: Rate;
+    coin_pattern_rate: Rate;
+    stacked_research_flag_rate: Rate;
+  };
+  ablations: Ablation[];
+  latency_ms: { explain_false_p50: number; explain_false_p95: number; explain_true_one_sample: number | null; device: string };
+  provenance: { evaluated_at: string; git_commit: string; weights_sha256: string; platform: string };
+};
+
+function loadReport(): EvalReport | null {
+  const p = path.join(process.cwd(), "public/figures/validation/eval_report.json");
+  if (!fs.existsSync(p)) return null;
+  return JSON.parse(fs.readFileSync(p, "utf8")) as EvalReport;
+}
+
+function pct(rate: Rate | undefined): string {
+  if (!rate || rate.rate == null) return "—";
+  const [lo, hi] = rate.wilson95;
+  return `${(rate.rate * 100).toFixed(1)}% (${rate.count}/${rate.n}; Wilson 95% ${(lo * 100).toFixed(1)}–${(hi * 100).toFixed(1)})`;
 }
 
 export default function ValidationPage() {
   const report = loadReport();
-  const { metrics, confusion_matrix: cm, smoke_tests } = report;
-  const h = metrics.haloscan;
-  const b = metrics.baseline_emory_2020;
 
   return (
     <div className="page">
       <Nav />
-
-      <h1>Validation</h1>
+      <h1>Evaluation</h1>
       <p className="lede">
-        Synthetic holdout, n = {h.n_per_class} per class. Haloscan prioritizes battery safety over coin specificity.
+        Synthetic measurements of the shipped checkpoint. These are not clinical accuracy and they are not a
+        comparison that shows HaloScan beating the Emory 2020 radiograph study.
       </p>
 
-      <table className="data">
-        <thead>
-          <tr>
-            <th>Metric</th>
-            <th>Haloscan</th>
-            <th>Emory 2020</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Battery sensitivity</td>
-            <td>{(h.battery_sensitivity * 100).toFixed(0)}%</td>
-            <td>{(b.battery_sensitivity * 100).toFixed(0)}%</td>
-          </tr>
-          <tr>
-            <td>Stacked-coin emergency catch</td>
-            <td>{(h.stacked_coin_emergency_rate * 100).toFixed(0)}%</td>
-            <td>—</td>
-          </tr>
-          <tr>
-            <td>Coin sensitivity</td>
-            <td>{(h.coin_sensitivity * 100).toFixed(0)}%</td>
-            <td>{(b.coin_sensitivity * 100).toFixed(0)}%</td>
-          </tr>
-        </tbody>
-      </table>
+      {!report ? (
+        <p>
+          The versioned report has not been generated yet. From the repository root:{" "}
+          <code>python3 -m haloscan.eval_suite --n 40</code>
+        </p>
+      ) : (
+        <>
+          <p>{report.disclaimer}</p>
+          <p className="muted">
+            Evaluated {report.provenance.evaluated_at}. Commit {report.provenance.git_commit.slice(0, 12)}. Weights
+            SHA-256 {report.provenance.weights_sha256.slice(0, 16)}… Device {report.latency_ms.device},{" "}
+            {report.provenance.platform}.
+          </p>
 
-      <Image
-        src="/figures/validation/benchmark.png"
-        alt="Benchmark chart"
-        width={640}
-        height={400}
-        className="figure-img"
-        unoptimized
-      />
-
-      <ReadMore title="Confusion matrix">
-        <Image
-          src="/figures/validation/confusion_matrix.png"
-          alt="Confusion matrix"
-          width={640}
-          height={480}
-          className="figure-img"
-          unoptimized
-        />
-        <table className="data">
-          <thead>
-            <tr>
-              <th />
-              {cm.classes.map((c) => (
-                <th key={c}>{c}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {cm.classes.map((rowLabel, i) => (
-              <tr key={rowLabel}>
-                <td>{rowLabel}</td>
-                {cm.matrix[i].map((val, j) => (
-                  <td key={j}>{val}</td>
-                ))}
+          <table className="data">
+            <thead>
+              <tr>
+                <th>Synthetic measure</th>
+                <th>In-distribution holdout</th>
+                <th>Shifted generator</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </ReadMore>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Battery research-flag rate</td>
+                <td>{pct(report.holdout_ensemble.battery_research_flag_sensitivity)}</td>
+                <td>{pct(report.shifted_ensemble.battery_research_flag_sensitivity)}</td>
+              </tr>
+              <tr>
+                <td>Coin-like pattern rate</td>
+                <td>{pct(report.holdout_ensemble.coin_pattern_rate)}</td>
+                <td>{pct(report.shifted_ensemble.coin_pattern_rate)}</td>
+              </tr>
+              <tr>
+                <td>Stacked-coin research-flag rate</td>
+                <td>{pct(report.holdout_ensemble.stacked_research_flag_rate)}</td>
+                <td>{pct(report.shifted_ensemble.stacked_research_flag_rate)}</td>
+              </tr>
+              <tr>
+                <td>Normal images flagged</td>
+                <td>{pct(report.holdout_ensemble.normal_false_research_flag_rate)}</td>
+                <td>—</td>
+              </tr>
+            </tbody>
+          </table>
 
-      <ReadMore title="Smoke tests">
-        <ul className="plain-list">
-          {smoke_tests.map((t) => (
-            <li key={t.name}>
-              <code>{t.name}</code> — {t.desc}
-            </li>
-          ))}
-        </ul>
-        <pre>{`python3 tests/smoke_test.py
-python3 -m haloscan.evaluate --n 40`}</pre>
-      </ReadMore>
+          <ReadMore title="Battery flag versus coin and normal">
+            <p>{report.holdout_ensemble.battery_flag_vs_coin_and_normal.note}</p>
+            <table className="data">
+              <tbody>
+                <tr>
+                  <td>Precision</td>
+                  <td>{report.holdout_ensemble.battery_flag_vs_coin_and_normal.precision}</td>
+                </tr>
+                <tr>
+                  <td>Recall</td>
+                  <td>{report.holdout_ensemble.battery_flag_vs_coin_and_normal.recall}</td>
+                </tr>
+                <tr>
+                  <td>Specificity</td>
+                  <td>{report.holdout_ensemble.battery_flag_vs_coin_and_normal.specificity}</td>
+                </tr>
+                <tr>
+                  <td>F1</td>
+                  <td>{report.holdout_ensemble.battery_flag_vs_coin_and_normal.f1}</td>
+                </tr>
+                <tr>
+                  <td>TP / FP / FN / TN</td>
+                  <td>
+                    {report.holdout_ensemble.battery_flag_vs_coin_and_normal.tp} /{" "}
+                    {report.holdout_ensemble.battery_flag_vs_coin_and_normal.fp} /{" "}
+                    {report.holdout_ensemble.battery_flag_vs_coin_and_normal.fn} /{" "}
+                    {report.holdout_ensemble.battery_flag_vs_coin_and_normal.tn}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </ReadMore>
 
-      <ReadMore title="Limitations">
-        <ul className="plain-list">
-          <li>Synthetic radiographs only — not a multi-site clinical trial.</li>
-          <li>Holdout metrics are synthetic; real-world validation still needed before clinical use.</li>
-          <li>Decision support only — not FDA-cleared.</li>
-        </ul>
-      </ReadMore>
+          <ReadMore title="Confusion, same holdout">
+            <table className="data">
+              <thead>
+                <tr>
+                  <th>True \ called</th>
+                  {report.holdout_ensemble.confusion.predicted_buckets.map((c) => (
+                    <th key={c}>{c}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {report.holdout_ensemble.confusion.true_labels.map((label, i) => (
+                  <tr key={label}>
+                    <td>{label}</td>
+                    {report.holdout_ensemble.confusion.matrix[i].map((value, j) => (
+                      <td key={j}>{value}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </ReadMore>
+
+          <ReadMore title="Ablations on the same holdout seeds">
+            <table className="data">
+              <thead>
+                <tr>
+                  <th>Configuration</th>
+                  <th>Battery flag</th>
+                  <th>Coin pattern</th>
+                  <th>Stack flagged</th>
+                </tr>
+              </thead>
+              <tbody>
+                {report.ablations.map((row) => (
+                  <tr key={row.name}>
+                    <td>
+                      {row.name}
+                      {row.note ? ` — ${row.note}` : ""}
+                    </td>
+                    <td>{pct(row.battery_research_flag_sensitivity)}</td>
+                    <td>{pct(row.coin_pattern_rate)}</td>
+                    <td>{pct(row.stacked_research_flag_rate)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <Image
+              src="/figures/validation/ablation.png"
+              alt="Ablation rates on the synthetic holdout"
+              width={900}
+              height={420}
+              className="figure-img"
+              unoptimized
+            />
+          </ReadMore>
+
+          <ReadMore title="Failures and latency">
+            {report.holdout_ensemble.failures.length === 0 ? (
+              <p>No holdout rows matched the failure rules in this run. That is not evidence of clinical safety.</p>
+            ) : (
+              <ul className="plain-list">
+                {report.holdout_ensemble.failures.map((row) => (
+                  <li key={`${row.failure}-${row.label}-${row.index}`}>
+                    {row.failure}: {row.label} #{row.index} called {row.prediction}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p>
+              CPU latency without Grad-CAM: p50 {report.latency_ms.explain_false_p50} ms, p95{" "}
+              {report.latency_ms.explain_false_p95} ms. One sample with Grad-CAM:{" "}
+              {report.latency_ms.explain_true_one_sample ?? "not measured"} ms.
+            </p>
+          </ReadMore>
+
+          <ReadMore title="How the images are made">
+            <p>{report.dataset.holdout_description}</p>
+            <p>{report.dataset.shift_description}</p>
+            <p>{report.dataset.pairing}</p>
+            <p>{report.dataset.leakage}</p>
+            <p>{report.dataset.real_radiographs}</p>
+            <p>{report.definitions.training_label_collapse}</p>
+          </ReadMore>
+        </>
+      )}
 
       <p>
-        <Link href="/scan?judge=1">Run judge demo</Link>
+        Reproduce with <code>python3 -m haloscan.eval_suite --n 40</code>. The command writes{" "}
+        <code>docs/eval/eval_report.json</code> and the chart on this page.
       </p>
-
+      <p>
+        <Link href="/scan?judge=1">Open the judge demo</Link>
+      </p>
       <footer>
         <p>
           <Link href="/">← Home</Link>

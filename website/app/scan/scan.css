@@ -1,13 +1,16 @@
 .scan-root {
-  --text: #111;
-  --muted: #666;
-  --line: #ddd;
-  --critical: #8b0000;
-  --serif: "Times New Roman", Times, Georgia, serif;
-  --mono: "Courier New", Courier, monospace;
-  min-height: 100vh;
-  background: #fff;
+  --text: #ece8e1;
+  --muted: #b0a89c;
+  --line: #343842;
+  --bg: #121418;
+  --surface: #1c1f26;
+  --accent: #d6a15a;
+  background: var(--bg);
   color: var(--text);
+  min-height: 100vh;
+  --critical: #c47b4a;
+  --serif: "Iowan Old Style", Palatino, "Palatino Linotype", Georgia, serif;
+  --mono: "Courier New", Courier, monospace;
   font-family: var(--serif);
   font-size: 17px;
   line-height: 1.65;
@@ -56,7 +59,7 @@
 }
 
 .status-pill.live {
-  color: #1a5c1a;
+  color: var(--accent);
 }
 
 .scan-judge-hint {
@@ -160,7 +163,7 @@
   padding: 14px;
   margin-bottom: 12px;
   cursor: pointer;
-  background: #fafafa;
+  background: var(--surface);
 }
 
 .dropzone:hover {
@@ -194,9 +197,9 @@
   width: 100%;
   padding: 12px;
   margin-top: 4px;
-  background: var(--text);
-  color: #fff;
-  border: 1px solid var(--text);
+  background: var(--accent);
+  color: #1a140e;
+  border: 1px solid var(--accent);
   font-family: var(--serif);
   font-size: 16px;
   cursor: pointer;
@@ -238,8 +241,8 @@
 .btn-judge-run {
   margin-top: 12px;
   padding: 10px 16px;
-  background: var(--text);
-  color: #fff;
+  background: var(--accent);
+  color: #1a140e;
   border: none;
   font-family: var(--serif);
   font-size: 15px;
@@ -462,7 +465,8 @@
 
 .btn-sec {
   padding: 8px 14px;
-  background: #fff;
+  background: var(--surface);
+  color: var(--text);
   border: 1px solid var(--line);
   font-family: var(--serif);
   font-size: 15px;
@@ -490,7 +494,8 @@
   width: 100%;
   padding: 20px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface);
+  color: var(--text);
 }
 
 .pipeline-title {
@@ -541,8 +546,9 @@
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--text);
-  color: #fff;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
   padding: 10px 16px;
   font-size: 14px;
   z-index: 200;
@@ -560,7 +566,8 @@
 }
 
 .help-modal {
-  background: #fff;
+  background: var(--surface);
+  color: var(--text);
   border: 1px solid var(--line);
   padding: 24px;
   max-width: 400px;
@@ -594,6 +601,40 @@
   font-size: 14px;
   color: var(--muted);
   margin: 0 0 12px;
+}
+
+.safety-banner,
+.safety-inline,
+.synthetic-label {
+  max-width: 640px;
+  margin: 12px auto;
+  padding: 0 24px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.safety-banner a {
+  color: var(--accent);
+}
+
+.synthetic-label {
+  color: var(--accent);
+}
+
+.verdict.battery,
+.verdict.ambiguous {
+  border-left: 3px solid var(--accent);
+}
+
+.verdict.coin,
+.verdict.routine {
+  border-left: 3px solid var(--line);
+}
+
+.scan-layout,
+.example-strip {
+  max-width: 1100px;
 }
 
 @media (max-width: 480px) {

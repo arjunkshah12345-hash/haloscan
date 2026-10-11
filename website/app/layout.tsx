@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Haloscan — Pediatric X-ray Decision Support",
+  title: "HaloScan — experimental X-ray research prototype",
   description:
-    "Live ML that distinguishes button batteries from coins on pediatric X-rays. Congressional App Challenge 2026.",
+    "Experimental student prototype for synthetic button-battery and coin X-ray patterns. Not a medical device. Congressional App Challenge 2026.",
   openGraph: {
-    title: "Haloscan",
-    description: "Battery vs coin on pediatric chest X-rays.",
+    title: "HaloScan",
+    description: "Experimental research prototype. Not a diagnosis and not a medical device.",
     type: "website",
     url: "https://haloscan-cac.vercel.app",
   },
