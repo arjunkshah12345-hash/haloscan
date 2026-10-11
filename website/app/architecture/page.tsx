@@ -7,7 +7,7 @@ const MODULES = [
   { file: "models.py", title: "DualViewNet — twin encoders, battery-weighted loss" },
   { file: "inference.py", title: "CV + CNN ensemble fusion and ambiguity rules" },
   { file: "gradcam.py", title: "Grad-CAM explainability overlays" },
-  { file: "clinical.py", title: "CRITICAL / URGENT / ROUTINE protocol engine" },
+  { file: "clinical.py", title: "Research readout and uncertainty. No discharge or treatment orders." },
   { file: "api/main.py", title: "FastAPI on Render — /api/analyze, /api/demo, /api/metrics" },
 ];
 
@@ -17,7 +17,7 @@ export default function ArchitecturePage() {
       <Nav />
 
       <h1>Architecture</h1>
-      <p className="lede">OpenCV radial profiling fused with DualViewNet (PyTorch). Every scan returns explainability images and a clinical protocol.</p>
+      <p className="lede">OpenCV radial profiling fused with DualViewNet. Numbers below are the ones in the code, not a simplified diagram.</p>
 
       <pre>{`AP X-ray → CLAHE → radial halo profiler ─┐
 Lateral  → step-off analyzer              ├→ ensemble → verdict + Grad-CAM
@@ -34,11 +34,17 @@ Lateral  → step-off analyzer              ├→ ensemble → verdict + Grad-C
       </ReadMore>
 
       <ReadMore title="Fusion equation">
-        <pre>{`battery_prob = 0.50·P_cv + 0.40·P_cnn + dual_bonus
+        <pre>{`ViewEncoder: ConvBlock 3→32, 32→64, 64→128, AdaptiveAvgPool → 128
+DualViewNet: AP encoder + lateral encoder, concat 256, Linear 256→128→3 classes
+Missing lateral: the lateral half of the vector is zeros
+Loss weights in classifier.py: [2.5, 1.4, 0.5] for battery, coin, normal
+Stacked coins are mapped to the battery class during training
 
-Stacked-coin rule:
-  multi_peak AP profile OR stacked_mimic_score ≥ 0.42
-  → conservative CRITICAL (false halo trap)`}</pre>
+Ensemble in inference.py:
+  battery = 0.48·CV + 0.42·CNN + 0.10·(1 − CNN coin)
+  +0.06 if a lateral step-off score is above 0.35
+Ambiguity: halo > 0.42 and (no lateral or step-off < 0.38), plus stacked-mimic rules
+The ambiguity path is a research flag. It is not a clinical order.`}</pre>
       </ReadMore>
 
       <ReadMore title="Deployment">

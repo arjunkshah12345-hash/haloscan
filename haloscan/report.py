@@ -71,13 +71,13 @@ def generate_html_report(result: HaloscanResult) -> str:
 <body>
   <div class="header">
     <h1>Haloscan Analysis Report</h1>
-    <p class="meta">Generated {ts} · Inference {result.inference_ms:.0f} ms · Decision support only — not a medical device</p>
+    <p class="meta">Generated {ts} · Inference {result.inference_ms:.0f} ms · Experimental research prototype — not a medical device and not a diagnosis</p>
   </div>
 
   <div class="verdict">
     <div class="verdict-title">{result.prediction}</div>
     <p class="verdict-meta">
-      Confidence: {result.confidence:.1%} · Battery: {result.battery_probability:.1%} · Coin: {result.coin_probability:.1%}{emergency_tag}
+      Uncalibrated score: {result.confidence:.1%} · Battery-like: {result.battery_probability:.1%} · Coin-like: {result.coin_probability:.1%}{emergency_tag}
     </p>
   </div>
 
@@ -94,7 +94,8 @@ def generate_html_report(result: HaloscanResult) -> str:
     <tr><td>Stacked-coin mimic score</td><td>{result.ap_halo.stacked_mimic_score:.3f}</td></tr>
     <tr><td>Step-off score</td><td>{lat_step:.3f}</td></tr>
     <tr><td>Dual-view fusion</td><td>{"Yes" if result.dual_view_used else "No"}</td></tr>
-    <tr><td>Emergency flag</td><td>{"Yes" if result.emergency else "No"}</td></tr>
+    <tr><td>Research flag (not a clinical order)</td><td>{"Raised" if result.emergency else "Not raised"}</td></tr>
+    <tr><td>Uncertainty</td><td>{p.uncertainty}</td></tr>
   </table>
 
   <p><strong>Interpretation:</strong> {result.explanation}</p>
@@ -106,7 +107,8 @@ def generate_html_report(result: HaloscanResult) -> str:
   <figure><figcaption>Radial halo profile</figcaption><img src="{result.radial_chart_b64}" alt="Radial profile" style="max-width:480px"/></figure>
 
   <div class="protocol">
-    <h2>{p.urgency} — Clinical Protocol</h2>
+    <h2>{p.research_label} — research readout</h2>
+    <p><strong>{p.safety}</strong></p>
     <p><em>{p.time_window}</em></p>
     <ul>{actions}</ul>
     <p><strong>Contacts:</strong></p>
@@ -115,9 +117,10 @@ def generate_html_report(result: HaloscanResult) -> str:
   </div>
 
   <p class="disclaimer">
-    Haloscan is research decision support tied to Reese's Law (P.L. 117-171) diagnostic gap analysis.
-    This report does not constitute medical advice. Suspected button battery ingestion requires immediate emergency care.<br/>
-    Poison Control: 1-800-222-1222 · National Battery Ingestion Hotline: 202-625-3333
+    HaloScan is an experimental research prototype trained and scored on synthetic images.
+    It is not FDA-cleared, not a medical device, and not a diagnosis.
+    Suspected button-battery ingestion requires immediate professional emergency evaluation regardless of this report.<br/>
+    National Battery Ingestion Hotline: 1-800-498-8666 · Poison Help: 1-800-222-1222
   </p>
 </body>
 </html>"""

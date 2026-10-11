@@ -99,6 +99,61 @@ def draw_coin_lateral(bg: np.ndarray, cx: int, cy: int, r: int) -> np.ndarray:
     return _add_noise(img)
 
 
+def generate_shifted_sample(
+    label: int,
+    size: int = 288,
+    lateral: bool = False,
+    seed: int | None = None,
+) -> np.ndarray:
+    """Same objects, different imaging conditions.
+
+    Shifts used for the external-to-training-look evaluation:
+    smaller frame, edge-biased placement, gamma change, heavier noise,
+    and a low-quality JPEG round trip. Not a clinical radiograph.
+    """
+    if seed is not None:
+        random.seed(seed)
+        np.random.seed(seed)
+    bg = _xray_background(size)
+    margin = max(8, size // 12)
+    cx = random.choice(
+        [
+            random.randint(margin, max(margin + 1, size // 5)),
+            random.randint(min(size - margin - 1, 4 * size // 5), size - margin),
+            random.randint(size // 4, 3 * size // 4),
+        ]
+    )
+    cy = random.choice(
+        [
+            random.randint(margin, max(margin + 1, size // 5)),
+            random.randint(size // 3, 2 * size // 3),
+        ]
+    )
+    r = random.randint(max(8, size // 14), max(12, size // 8))
+    if label == 0:
+        img = draw_battery_lateral(bg, cx, cy, r) if lateral else draw_battery_ap(bg, cx, cy, r)
+    elif label == 1:
+        img = draw_coin_lateral(bg, cx, cy, r) if lateral else draw_coin(bg, cx, cy, r)
+    elif label == 2:
+        img = draw_stacked_coins_ap(bg, cx, cy, r)
+    else:
+        img = _add_noise(bg)
+
+    gamma = random.choice([0.55, 0.8, 1.45, 1.8])
+    img = np.clip(img, 0, 1) ** gamma
+    gray_u8 = (np.clip(img, 0, 1) * 255).astype(np.uint8)
+    ok, enc = cv2.imencode(".jpg", gray_u8, [int(cv2.IMWRITE_JPEG_QUALITY), random.randint(30, 55)])
+    if ok:
+        decoded = cv2.imdecode(enc, cv2.IMREAD_GRAYSCALE)
+        if decoded is not None:
+            img = decoded.astype(np.float32) / 255.0
+    img = img + np.random.normal(0, 0.045, img.shape).astype(np.float32)
+    # A soft bar mimics a collimator or annotation the generator never trained on.
+    y0 = random.randint(0, max(1, size // 3))
+    img[y0 : y0 + 3, :] *= random.uniform(0.35, 0.7)
+    return np.clip(img, 0, 1)
+
+
 def generate_sample(
     label: int,
     size: int = 320,

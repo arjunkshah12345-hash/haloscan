@@ -20,6 +20,9 @@ type Protocol = {
   actions: string[];
   contacts: string[];
   reese_law_note: string;
+  research_label?: string;
+  uncertainty?: string;
+  safety?: string;
 };
 
 type Result = {
@@ -41,18 +44,23 @@ type Result = {
   gradcam_b64: string;
   radial_chart_b64: string;
   stacked_mimic?: boolean;
+  inference_source?: string;
+  synthetic_label?: string;
+  synthetic_demo?: boolean;
 };
 
 type Metrics = {
-  haloscan?: { battery_sensitivity: number; stacked_coin_emergency_rate: number };
-  baseline_emory_2020?: { battery_sensitivity: number };
+  haloscan?: { battery_sensitivity?: number; stacked_coin_emergency_rate?: number };
+  baseline_emory_2020?: { battery_sensitivity?: number };
+  holdout_ensemble?: { battery_research_flag_sensitivity?: { rate?: number } };
+  clinical_accuracy?: boolean;
 };
 
 const CASES = [
-  { id: "battery", title: "Button battery", sub: "AP + lateral · Case 1", key: "1", fig: "/figures/battery/ap.png" },
-  { id: "coin", title: "Single coin", sub: "AP only · Case 2", key: "2", fig: "/figures/coin/ap.png" },
-  { id: "stacked", title: "Stacked coins", sub: "False halo · Case 3", key: "3", fig: "/figures/stacked/ap.png" },
-  { id: "normal", title: "Normal study", sub: "No foreign body · Case 4", key: "4", fig: "/figures/normal/ap.png" },
+  { id: "battery", title: "Button battery", sub: "Synthetic · AP + lateral", key: "1", fig: "/figures/battery/ap.png" },
+  { id: "coin", title: "Single coin", sub: "Synthetic · AP only", key: "2", fig: "/figures/coin/ap.png" },
+  { id: "stacked", title: "Stacked coins", sub: "Synthetic mimic", key: "3", fig: "/figures/stacked/ap.png" },
+  { id: "normal", title: "No disc", sub: "Synthetic background", key: "4", fig: "/figures/normal/ap.png" },
 ];
 
 const PIPELINE_STEPS = [
@@ -60,8 +68,25 @@ const PIPELINE_STEPS = [
   "CLAHE contrast + disc localization",
   "Radial halo profiling (OpenCV)",
   "DualViewNet forward pass (PyTorch)",
-  "Ensemble fusion + Grad-CAM + protocol",
+  "Ensemble fusion + Grad-CAM",
 ];
+
+const SAFETY =
+  "Suspected button-battery ingestion needs immediate professional emergency evaluation regardless of this prototype. HaloScan does not diagnose, rule out a battery, recommend discharge, or delay care.";
+
+function researchLabel(r: Result): string {
+  if (r.protocol?.research_label) return r.protocol.research_label;
+  if (r.ambiguous || r.stacked_mimic) return "AMBIGUOUS PATTERN";
+  if (/battery/i.test(r.prediction)) return "BATTERY-LIKE PATTERN";
+  if (/coin/i.test(r.prediction)) return "COIN-LIKE PATTERN";
+  return "NO DISC PATTERN";
+}
+
+function sourceLabel(r: Result): string {
+  if (r.inference_source === "live") return `Live inference · ${r.inference_ms.toFixed(0)} ms`;
+  if (r.inference_source === "prerecorded_research_demo") return "Prerecorded synthetic demo · not a new forward pass";
+  return `Unlabeled result · ${r.inference_ms.toFixed(0)} ms`;
+}
 
 export function ScanApp() {
   const searchParams = useSearchParams();
@@ -135,7 +160,11 @@ export function ScanApp() {
 
   const onFile = (file: File, kind: "ap" | "lat") => {
     if (!file.type.startsWith("image/")) {
-      notify("Upload an image file");
+      notify("Upload a PNG, JPEG, or WebP image");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      notify("Image must be 8 MB or smaller");
       return;
     }
     const url = URL.createObjectURL(file);
@@ -164,14 +193,19 @@ export function ScanApp() {
           const err = await res.text();
           throw new Error(err.includes("timeout") ? "API waking up — try again in 30s" : err.slice(0, 120));
         }
-        setResult(await res.json());
+        const data = (await res.json()) as Result;
+        setResult(data);
         if (prev?.ok) {
           const p = await prev.json();
           if (p.ap_b64) setApPreview(p.ap_b64);
           setLatPreview(p.lateral_b64 ?? null);
         }
         scrollToResults();
-        notify(`Case ${CASES.find((c) => c.id === id)?.key} — live inference complete`);
+        notify(
+          data.inference_source === "live"
+            ? `Case ${CASES.find((c) => c.id === id)?.key} — live inference on a synthetic sample`
+            : `Case ${CASES.find((c) => c.id === id)?.key} — prerecorded synthetic demo, API did not run a new pass`,
+        );
         if (id === "battery") setNudgeCase3(true);
         else if (id === "stacked") setNudgeCase3(false);
       } catch (e) {
@@ -193,12 +227,12 @@ export function ScanApp() {
   }, [notify, runDemo]);
 
   useEffect(() => {
-    if (judgeMode && !judgeStarted.current && apiLive) {
+    if (judgeMode && !judgeStarted.current && !apiWarming && apiLive !== null) {
       judgeStarted.current = true;
       const t = setTimeout(() => runJudgeDemo(), 800);
       return () => clearTimeout(t);
     }
-  }, [judgeMode, apiLive, runJudgeDemo]);
+  }, [judgeMode, apiLive, apiWarming, runJudgeDemo]);
 
   const analyze = async () => {
     if (!apFile) return;
@@ -211,9 +245,10 @@ export function ScanApp() {
     try {
       const res = await fetch("/api/analyze", { method: "POST", body: form });
       if (!res.ok) throw new Error(await res.text());
-      setResult(await res.json());
+      const data = (await res.json()) as Result;
+      setResult({ ...data, inference_source: data.inference_source || "live" });
       scrollToResults();
-      notify("Analysis complete — real upload inference");
+      notify("Analysis complete — live inference on the uploaded image");
     } catch (e) {
       notify(e instanceof Error ? e.message : "Analysis failed");
     } finally {
@@ -238,7 +273,7 @@ export function ScanApp() {
       a.href = URL.createObjectURL(new Blob([html], { type: "text/html" }));
       a.download = `haloscan-report-${Date.now()}.html`;
       a.click();
-      notify("Clinical report downloaded");
+      notify("Research report downloaded");
     } catch {
       notify("Report failed");
     } finally {
@@ -247,11 +282,11 @@ export function ScanApp() {
   };
 
   useEffect(() => {
-    if (caseParam && apiLive && !caseStarted.current && CASES.some((c) => c.id === caseParam)) {
+    if (caseParam && apiLive !== null && !apiWarming && !caseStarted.current && CASES.some((c) => c.id === caseParam)) {
       caseStarted.current = true;
       runDemo(caseParam);
     }
-  }, [caseParam, apiLive, runDemo]);
+  }, [caseParam, apiLive, apiWarming, runDemo]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -269,20 +304,30 @@ export function ScanApp() {
   }, [runDemo]);
 
   const r = result;
-  const verdictClass = r?.emergency ? "critical" : r?.prediction.includes("COIN") ? "routine" : "urgent";
-  const batSens = metrics?.haloscan?.battery_sensitivity;
+  const verdictClass = !r
+    ? "routine"
+    : r.ambiguous
+      ? "ambiguous"
+      : /coin/i.test(researchLabel(r))
+        ? "coin"
+        : /battery/i.test(researchLabel(r))
+          ? "battery"
+          : "routine";
+  const batSens =
+    metrics?.haloscan?.battery_sensitivity ??
+    metrics?.holdout_ensemble?.battery_research_flag_sensitivity?.rate;
   const emory = metrics?.baseline_emory_2020?.battery_sensitivity;
 
   return (
     <div className="scan-root">
       <header className="scan-header">
         <div className="scan-brand">
-          <h1>Haloscan scanner</h1>
-          <p className="scan-tagline">Live inference · keys 1–4</p>
+          <h1>HaloScan scanner</h1>
+          <p className="scan-tagline">Experimental research prototype · synthetic examples are labeled · keys 1–4</p>
         </div>
         <div className="scan-nav">
           <span className={`status-pill ${apiLive ? "live" : apiWarming ? "warm" : ""}`}>
-            {apiWarming ? "Warming…" : apiLive === null ? "…" : apiLive ? "Online" : "Offline"}
+            {apiWarming ? "Checking API…" : apiLive === null ? "…" : apiLive ? "Live API" : "API offline · demos are prerecorded"}
           </span>
           <Link href="/">Home</Link>
           <Link href="/judges">Judges</Link>
@@ -292,10 +337,15 @@ export function ScanApp() {
         </div>
       </header>
 
+      <p className="safety-banner" role="note">
+        {SAFETY} National Battery Ingestion Hotline <a href="tel:18004988666">1-800-498-8666</a>. Poison Help{" "}
+        <a href="tel:18002221222">1-800-222-1222</a>.
+      </p>
+
       {judgeBanner && (
         <p className="scan-judge-hint">
           Judge demo: press <kbd>1</kbd> then <kbd>3</kbd>.{" "}
-          <button type="button" className="link-btn" onClick={runJudgeDemo} disabled={loading || !apiLive}>
+          <button type="button" className="link-btn" onClick={runJudgeDemo} disabled={loading || apiWarming}>
             Run both automatically
           </button>
         </p>
@@ -375,10 +425,10 @@ export function ScanApp() {
               <p className="results-empty-lead">No analysis yet</p>
               <p>Click a reference case above or press <kbd>1</kbd> to start.</p>
               <p className="results-empty-hook">
-                <strong>For judges:</strong> Case <kbd>1</kbd> = battery CRITICAL · Case <kbd>3</kbd> = stacked coins
-                false halo
+                <strong>For judges:</strong> Case <kbd>1</kbd> is a synthetic battery. Case <kbd>3</kbd> is synthetic
+                stacked coins. Both run the real model when the API is up, and say so when they do not.
               </p>
-              <button type="button" className="btn-judge-inline" onClick={runJudgeDemo} disabled={loading || !apiLive}>
+              <button type="button" className="btn-judge-inline" onClick={runJudgeDemo} disabled={loading || apiWarming}>
                 Run 90-second judge demo
               </button>
             </div>
@@ -388,28 +438,29 @@ export function ScanApp() {
                 {r.emergency && <span className="badge badge-critical">EMERGENCY</span>}
                 {r.ambiguous && <span className="badge badge-ambiguous">Ambiguous halo</span>}
                 {r.dual_view_used && <span className="badge badge-dual">Dual-view fusion</span>}
-                <span className="badge badge-live">Live inference · {r.inference_ms.toFixed(0)} ms</span>
+                <span className={`badge ${r.inference_source === "live" ? "badge-live" : "badge-ambiguous"}`}>{sourceLabel(r)}</span>
               </div>
 
               <div className={`verdict ${verdictClass}`}>
-                <div className="verdict-title">{r.prediction}</div>
+                <div className="verdict-title">{researchLabel(r)}</div>
                 <div className="verdict-meta">
-                  {(r.confidence * 100).toFixed(1)}% confidence · Protocol: <strong>{r.protocol.urgency}</strong>
+                  Uncalibrated score {(r.confidence * 100).toFixed(1)}% · uncertainty {r.protocol.uncertainty || "unspecified"}
                 </div>
               </div>
 
-              {r.emergency && (
-                <div className="emergency-strip pulse">
-                  <span className="emergency-icon">⚠</span>
-                  Two-hour esophageal window — treat as battery until endoscopy excludes lodgement
+              <p className="safety-inline">{r.protocol.safety || SAFETY}</p>
+              {r.synthetic_label && <p className="synthetic-label">{r.synthetic_label}</p>}
+
+              {r.ambiguous && (
+                <div className="emergency-strip">
+                  Ambiguous radial pattern. This is a research flag, not a treatment order and not a reason to delay emergency care.
                 </div>
               )}
 
               {nudgeCase3 && activeCase === "battery" && (
                 <div className="nudge-case3">
                   <p>
-                    <strong>Judge checkpoint:</strong> Now run Case 3 — stacked coins fake the halo but still trigger
-                    CRITICAL.
+                    <strong>Judge checkpoint:</strong> Case 3 is synthetic stacked coins. Compare the ambiguity flag with Case 1.
                   </p>
                   <button type="button" className="btn-judge-run" onClick={() => runDemo("stacked")} disabled={loading}>
                     Run Case 3 (stacked coins) →
@@ -480,7 +531,7 @@ export function ScanApp() {
               </div>
 
               <details className="scan-details">
-                <summary>Clinical protocol — {r.protocol.urgency}</summary>
+                <summary>Research readout — {researchLabel(r)}</summary>
                 <div className="protocol">
                   <p className="protocol-window">{r.protocol.time_window}</p>
                   <ul>
@@ -506,7 +557,7 @@ export function ScanApp() {
                   className="btn-sec"
                   onClick={() => {
                     navigator.clipboard.writeText(
-                      `Haloscan: ${r.prediction}\nBattery ${(r.battery_probability * 100).toFixed(0)}%\n${r.protocol.urgency}\n${r.explanation}`,
+                      `HaloScan research readout: ${researchLabel(r)}\nUncalibrated battery-like score ${(r.battery_probability * 100).toFixed(0)}%\nSource: ${r.inference_source || "unlabeled"}\n${SAFETY}`,
                     );
                     notify("Summary copied");
                   }}
@@ -523,14 +574,12 @@ export function ScanApp() {
             <summary>About this tool</summary>
             <div className="read-more-body">
               <p>
-                Battery sensitivity {batSens != null ? `${(batSens * 100).toFixed(0)}%` : "100%"} vs Emory 2020{" "}
-                {emory != null ? `${(emory * 100).toFixed(0)}%` : "81%"}. Stacked-coin catch{" "}
-                {metrics?.haloscan?.stacked_coin_emergency_rate != null
-                  ? `${(metrics.haloscan.stacked_coin_emergency_rate * 100).toFixed(0)}%`
-                  : "95%"}
-                .
+                Published figures are synthetic. A battery-flag point estimate
+                {batSens != null ? ` of ${(batSens * 100).toFixed(0)}%` : ""} is not clinical sensitivity and is not a
+                comparison with the Emory 2020 radiograph study
+                {emory != null ? ` (published battery sensitivity ${(emory * 100).toFixed(0)}% on a different dataset)` : ""}.
               </p>
-              <p className="muted">Decision support only — not a medical device.</p>
+              <p className="muted">Experimental prototype. Not a medical device. Not FDA cleared.</p>
             </div>
           </details>
         </aside>

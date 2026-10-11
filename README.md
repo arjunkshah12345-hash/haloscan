@@ -20,15 +20,15 @@
   <img src="https://img.shields.io/badge/CAC-2026-red?style=flat-square" alt="Congressional App Challenge" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT" />
   <img src="https://img.shields.io/badge/python-3.10+-green?style=flat-square" alt="Python" />
-  <img src="https://img.shields.io/badge/battery_sensitivity-100%25-success?style=flat-square" alt="100% battery sensitivity" />
+  <img src="https://img.shields.io/badge/status-experimental_prototype-lightgrey?style=flat-square" alt="Experimental research prototype" />
   <img src="https://img.shields.io/badge/Reese's_Law-P.L._117--171-lightgrey?style=flat-square" alt="Reese's Law" />
 </p>
 
 ---
 
-**Haloscan** is open-source AI decision support that distinguishes **button batteries from coins** on pediatric X-rays — closing the diagnostic gap [Reese's Law](https://www.congress.gov/bill/117th-congress/house-bill/5313) left open.
+**HaloScan** is an experimental research prototype that studies button-battery-like and coin-like patterns on synthetic X-ray images. It is not a medical device and it does not diagnose.
 
-Congress passed child-proof battery packaging **409–2**. When a disc already sits in a child's esophagus, clinicians still have **~2 hours**. Stacked coins **fake the double halo sign**. Emory's 2020 ML model hit 81% battery sensitivity and **never shipped**. Haloscan does.
+[Reese's Law](https://www.congress.gov/bill/117th-congress/house-bill/5313) (Public Law 117-171, August 16, 2022) requires safer packaging, labels, and battery compartments. It is a prevention statute. The House passed the bill under suspension of the rules and the Senate passed it by unanimous consent. Suspected button-battery ingestion needs emergency care regardless of this app. National Battery Ingestion Hotline: **1-800-498-8666**. A 2020 Emory abstract reported a YOLOv2 model on 228 radiographs. HaloScan's numbers are synthetic and are not a comparison with that study.
 
 <p align="center">
   <a href="https://haloscan-cac.vercel.app/scan"><strong>→ Try the live demo</strong></a>
@@ -38,20 +38,13 @@ Congress passed child-proof battery packaging **409–2**. When a disc already s
 
 ## Why "Haloscan"
 
-Radiologists look for the **double halo** on AP films — bright outer rim, darker center, inner ring — to spot button batteries. **Haloscan** measures that signature with radial intensity profiling, fuses it with a dual-view neural network, and outputs a clinical protocol when the halo lies.
+Radiologists look for a **double halo** on AP films — bright outer rim, darker center, inner ring — when a button battery is suspected. HaloScan measures a radial profile, fuses it with a dual-view network, and shows an uncertainty readout. It does not output a treatment plan.
 
 ---
 
-## Results
+## Measurements
 
-| | Haloscan | Emory 2020 (Rostad et al.) |
-|---|:---:|:---:|
-| **Battery sensitivity** | **100%** | 81% |
-| **Stacked-coin emergency catch** | **95%** | — |
-| Coin sensitivity | **100%** | 83% |
-| Overall accuracy (baseline) | — | 88% |
-
-*Synthetic holdout, n=40/class. See `weights/metrics.json`.*
+Synthetic only. See `docs/eval/eval_report.json` after `python3 -m haloscan.eval_suite --n 40`, and the [evaluation page](https://haloscan-cac.vercel.app/validation). Do not read a point estimate on 40 drawn images as clinical sensitivity, and do not compare it with the Emory 2020 radiograph study.
 
 ---
 
@@ -161,7 +154,7 @@ Built to connect **federal legislation** (Reese's Law, P.L. 117-171) to an unsol
 
 **Decision support / research only.** Not a medical device. Not FDA cleared.
 
-Suspected button battery ingestion → **911** · Poison Control **1-800-222-1222** · Battery Ingestion Hotline **202-625-3333**
+Suspected button battery ingestion → emergency services · Poison Help **1-800-222-1222** · National Battery Ingestion Hotline **1-800-498-8666**
 
 ---
 
@@ -169,5 +162,5 @@ Suspected button battery ingestion → **911** · Poison Control **1-800-222-122
 
 [MIT](LICENSE) — use it, learn from it, fork it.
 
-<p align="center"><sub>Reese's Law fixed prevention. Haloscan fixes diagnosis.</sub><br/>
+<p align="center"><sub>Experimental research prototype. Not a medical device. Not a diagnosis.</sub><br/>
 <sub><a href="https://arjunshah.xyz">Arjun Shah</a> · Congressional App Challenge 2026</sub></p>

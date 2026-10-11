@@ -13,9 +13,9 @@ const BAYER = [
 type Bar = { label: string; value: number; color: string };
 
 const BARS: Bar[] = [
-  { label: "Haloscan", value: 100, color: "#8b0000" },
-  { label: "Emory 2020", value: 81, color: "#666666" },
-  { label: "Stacked catch", value: 95, color: "#1a5c1a" },
+  { label: "Synthetic flag", value: 100, color: "#d6a15a" },
+  { label: "Not clinical", value: 81, color: "#8a8478" },
+  { label: "Stack flag", value: 95, color: "#c47b4a" },
 ];
 
 function fillDitherRect(
@@ -102,7 +102,7 @@ export function DitherBenchmark({ className = "" }: { className?: string }) {
     <canvas
       ref={ref}
       className={`dither-benchmark-canvas ${className}`.trim()}
-      aria-label="Benchmark chart: Haloscan 100%, Emory 81%, stacked catch 95%"
+      aria-label="Synthetic research-flag chart. Not clinical accuracy and not a comparison with Emory 2020."
       role="img"
     />
   );

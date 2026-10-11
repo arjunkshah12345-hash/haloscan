@@ -22,7 +22,7 @@ function loadManifest(): CaseMeta[] {
 }
 
 const LABELS: Record<CaseId, string> = {
-  battery: "Button battery — CRITICAL",
+  battery: "Synthetic button battery",
   stacked: "Stacked coins — false halo trap",
   coin: "Single coin — ROUTINE",
   normal: "Normal study — no foreign body",

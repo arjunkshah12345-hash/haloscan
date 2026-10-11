@@ -12,7 +12,7 @@ const EVENTS = [
   {
     year: "2022",
     title: "Reese's Law (P.L. 117-171)",
-    body: "House passes 409–2. Mandates child-resistant packaging and warning labels — prevention, not diagnosis.",
+    body: "Public Law 117-171. Packaging, labels, and compartments — prevention, not a diagnostic device.",
   },
   {
     year: "2026",

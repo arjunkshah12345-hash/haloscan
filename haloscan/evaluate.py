@@ -1,92 +1,69 @@
+"""Legacy entry point. Prints a short synthetic summary and refuses a clinical comparison.
+
+The full suite, including the shift set and ablations, is:
+
+    python3 -m haloscan.eval_suite --n 40
+"""
+
 from __future__ import annotations
 
 import json
 from pathlib import Path
 
-import cv2
-import numpy as np
+from haloscan.eval_suite import HOLDOUT_SEED_BASE, run_suite
 
-from haloscan.synthetic import generate_sample
-
-
-def _get_engine():
-    from haloscan.inference import get_engine
-    return get_engine()
-
-
-BASELINE = {
-    "source": "Emory SPR 2020 (Rostad et al.)",
+# Published numbers from Rostad et al., kept only so a reader can see the study
+# HaloScan is sometimes compared with. The studies are not comparable.
+PUBLISHED_EMORY_2020 = {
+    "source": "Rostad et al., Pediatric Radiology / SPR 2020, as cited in the original HaloScan notes",
     "battery_sensitivity": 0.81,
     "battery_specificity": 0.92,
     "coin_sensitivity": 0.83,
     "overall_accuracy": 0.88,
+    "material": "228 radiographs, YOLOv2",
+    "comparable_to_haloscan_synthetic_metrics": False,
 }
 
 
-def evaluate_on_synthetic(n: int = 100) -> dict:
-    engine = _get_engine()
-
-    tp_bat = fp_bat = fn_bat = tn_bat = 0
-    tp_coin = fp_coin = fn_coin = tn_coin = 0
-    ambiguous_correct = 0
-    ambiguous_total = 0
-
-    for i in range(n):
-        # battery
-        ap = generate_sample(0, seed=i)
-        rgb = cv2.cvtColor((ap * 255).astype(np.uint8), cv2.COLOR_GRAY2RGB)
-        lat = cv2.cvtColor((generate_sample(0, lateral=True, seed=i + 1000) * 255).astype(np.uint8), cv2.COLOR_GRAY2RGB)
-        r = engine.analyze(rgb, lat)
-        is_bat = r.battery_probability >= 0.5 or r.emergency
-        if is_bat:
-            tp_bat += 1
-        else:
-            fn_bat += 1
-
-        # coin
-        ap = generate_sample(1, seed=i + 2000)
-        rgb = cv2.cvtColor((ap * 255).astype(np.uint8), cv2.COLOR_GRAY2RGB)
-        r = engine.analyze(rgb)
-        is_coin = "COIN" in r.prediction and not r.emergency
-        if is_coin:
-            tp_coin += 1
-        else:
-            fn_coin += 1
-
-        # stacked coins — should trigger ambiguous/emergency
-        ap = generate_sample(2, seed=i + 3000)
-        rgb = cv2.cvtColor((ap * 255).astype(np.uint8), cv2.COLOR_GRAY2RGB)
-        r = engine.analyze(rgb)
-        ambiguous_total += 1
-        if r.ambiguous or r.emergency:
-            ambiguous_correct += 1
-
-    bat_sens = tp_bat / max(1, tp_bat + fn_bat)
-    coin_sens = tp_coin / max(1, tp_coin + fn_coin)
-    amb_rate = ambiguous_correct / max(1, ambiguous_total)
-
+def evaluate_on_synthetic(n: int = 40) -> dict:
+    """Same-generator holdout only. Used by the API when a caller asks to recompute."""
+    report = run_suite(n=n, shift_n=0, include_predictions=False, ablations=False)
+    holdout = report["holdout_ensemble"]
     return {
+        "clinical_accuracy": False,
         "haloscan": {
-            "battery_sensitivity": round(bat_sens, 3),
-            "coin_sensitivity": round(coin_sens, 3),
-            "stacked_coin_emergency_rate": round(amb_rate, 3),
+            "battery_sensitivity": holdout["battery_research_flag_sensitivity"]["rate"],
+            "battery_sensitivity_wilson95": holdout["battery_research_flag_sensitivity"]["wilson95"],
+            "coin_sensitivity": holdout["coin_pattern_rate"]["rate"],
+            "stacked_coin_emergency_rate": holdout["stacked_research_flag_rate"]["rate"],
             "n_per_class": n,
+            "seed_base": HOLDOUT_SEED_BASE,
+            "what_these_mean": (
+                "Synthetic research-flag rates from generate_sample. "
+                "Not clinical sensitivity. Stacked-coin flagging is not battery classification accuracy."
+            ),
         },
-        "baseline_emory_2020": BASELINE,
-        "beats_baseline_battery_sensitivity": bat_sens >= BASELINE["battery_sensitivity"],
+        "baseline_emory_2020": PUBLISHED_EMORY_2020,
+        "beats_baseline_battery_sensitivity": False,
+        "comparison_note": (
+            "HaloScan's synthetic point estimate is not evidence that the system "
+            "outperforms the Emory 2020 model. The images, labels, and tasks differ."
+        ),
+        "provenance": report["provenance"],
     }
 
 
 def main():
     import argparse
 
-    p = argparse.ArgumentParser()
-    p.add_argument("--out", default="/tmp/haloscan/metrics.json")
-    p.add_argument("--n", type=int, default=80)
-    args = p.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--out", default="/tmp/haloscan/metrics.json")
+    parser.add_argument("--n", type=int, default=20)
+    args = parser.parse_args()
     metrics = evaluate_on_synthetic(n=args.n)
-    Path(args.out).parent.mkdir(parents=True, exist_ok=True)
-    Path(args.out).write_text(json.dumps(metrics, indent=2))
+    path = Path(args.out)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(metrics, indent=2))
     print(json.dumps(metrics, indent=2))
 
 

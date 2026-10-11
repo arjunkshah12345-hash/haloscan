@@ -9,6 +9,8 @@ export function Nav({ current }: { current?: "home" | "demo" | "judges" }) {
       <Link href="/scan" aria-current={current === "demo" ? "page" : undefined}>
         Scanner
       </Link>
+      <Link href="/architecture">Model</Link>
+      <Link href="/validation">Evaluation</Link>
       <Link href="/judges" aria-current={current === "judges" ? "page" : undefined}>
         Judges
       </Link>

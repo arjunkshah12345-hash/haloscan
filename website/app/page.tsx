@@ -8,10 +8,14 @@ export default function HomePage() {
     <div className="page">
       <Nav current="home" />
 
-      <h1>Haloscan</h1>
+      <h1>HaloScan</h1>
       <p className="lede">
-        AI decision support that distinguishes button batteries from coins on pediatric chest X-rays. Reese&apos;s
-        Law fixed packaging — this fixes the diagnosis.
+        An experimental research prototype that studies how a synthetic-trained model and a radial halo
+        detector describe button-battery-like and coin-like discs on X-ray-style images.
+      </p>
+      <p>
+        Suspected button-battery ingestion needs emergency care regardless of anything this app shows. HaloScan
+        does not diagnose, rule out a battery, or recommend discharge.
       </p>
       <p>
         <Link href="/scan">Open live scanner</Link>
@@ -23,81 +27,61 @@ export default function HomePage() {
 
       <MinimalFigure
         caseId="battery"
-        label="Button battery — CRITICAL"
-        caption="Classic double halo on AP view. Haloscan triggers a two-hour endoscopy protocol."
+        label="Synthetic button battery"
+        caption="A drawn double halo. The scanner shows a battery-like research score, not a treatment order."
       />
       <MinimalFigure
         caseId="stacked"
-        label="Stacked coins — false halo trap"
-        caption="Ring-like intensities mimic a battery. Haloscan flags CRITICAL rather than discharging the patient."
+        label="Synthetic stacked coins"
+        caption="Copied rings can look like a halo. The ambiguity flag is a research signal, not a discharge decision."
       />
       <MinimalFigure
         caseId="coin"
-        label="Single coin — ROUTINE"
-        caption="No halo mimicry. High coin probability and routine observation pathway."
+        label="Synthetic coin"
+        caption="A flat disc. A coin-like score does not rule out a battery and must not be used to send a child home."
       />
 
       <ReadMore title="Abstract">
         <p>
-          When a disc-shaped foreign body lodges in a child&apos;s esophagus, clinicians must distinguish a lithium
-          button battery from a coin on frontal chest radiography — often within minutes. Stacked coins can
-          reproduce the double halo sign. Haloscan fuses OpenCV radial profiling with DualViewNet (PyTorch). On
-          synthetic holdout data: 100% battery sensitivity (vs. 81% Emory 2020 baseline), 100% coin sensitivity,
-          95% stacked-coin emergency catch. Live web app with Grad-CAM, radial charts, and CRITICAL / URGENT / ROUTINE protocols.
+          When a disc-shaped object is suspected in a child&apos;s esophagus, clinicians distinguish a button battery
+          from a coin on radiographs. Stacked coins can copy the double-halo look. HaloScan is a student research
+          prototype: OpenCV radial profiles plus a small PyTorch dual-view network, trained and scored on a
+          procedural image generator. Those scores are not clinical accuracy. The live scanner shows the image,
+          the detected region, both branches, Grad-CAM, and an uncertainty readout.
         </p>
       </ReadMore>
 
       <ReadMore title="The problem">
         <p>
-          Reese&apos;s Law (P.L. 117-171) passed 409–2 in 2022 — child-resistant packaging, not diagnosis. In the
-          ER the question is binary: battery or coin? A battery in the esophagus needs emergent endoscopy within
-          ~two hours. A coin in the stomach is often observed.
+          Reese&apos;s Law (Public Law 117-171, enacted August 16, 2022) tells the Consumer Product Safety
+          Commission to require child-resistant packaging, warning labels, and safer battery compartments. It is
+          a prevention law. It does not validate any diagnostic app. The House passed the bill under suspension
+          of the rules; the Senate passed it by unanimous consent. A recorded 409–2 vote is not what Congress.gov
+          shows for final passage.
         </p>
         <p>
-          On AP films, batteries show a double halo. Stacked coins can fake it. Rural hospitals may not have
-          pediatric radiology at 2 AM. That is the gap Haloscan closes.
+          A button battery lodged in the esophagus can injure tissue within about two hours. That fact is why
+          suspected ingestion is an emergency. It is not a result this model is allowed to manage. Poison Control
+          and the National Battery Ingestion Hotline (1-800-498-8666) give the public guidance. HaloScan does not.
         </p>
       </ReadMore>
 
-      <ReadMore title="Results">
-        <table className="data">
-          <thead>
-            <tr>
-              <th>Metric</th>
-              <th>Haloscan</th>
-              <th>Emory 2020</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Battery sensitivity</td>
-              <td>100%</td>
-              <td>81%</td>
-            </tr>
-            <tr>
-              <td>Stacked-coin emergency catch</td>
-              <td>95%</td>
-              <td>—</td>
-            </tr>
-            <tr>
-              <td>Coin sensitivity</td>
-              <td>100%</td>
-              <td>83%</td>
-            </tr>
-          </tbody>
-        </table>
-        <p className="muted">
-          Safety-first ensemble: when the double halo is ambiguous (stacked coins), Haloscan flags emergency rather
-          than discharging the patient. Metrics: synthetic holdout, n=40/class — battery 100% vs Emory 81%, coin 100%
-          vs 83%, stacked-coin catch 95%.
+      <ReadMore title="What the measurements are">
+        <p>
+          The numbers in this repository come from the same kind of drawn images the model trained on, plus a
+          shifted synthetic set. They are not a clinical trial and they are not a head-to-head with the Emory 2020
+          YOLOv2 study on 228 real radiographs. See the <Link href="/validation">evaluation</Link> page for the
+          reproducible report, including Wilson intervals. A point estimate of 100% on 40 synthetic images is not
+          certainty.
         </p>
       </ReadMore>
 
       <ReadMore title="How it works">
         <p>
-          Two branches: (1) OpenCV radial halo profiling with Hough-circle detection, (2) DualViewNet CNN on AP +
-          optional lateral views. Outputs are fused with battery-weighted loss. Every scan returns probabilities,
-          Grad-CAM, radial profile, and a structured clinical protocol.
+          Two branches: OpenCV radial halo profiling, and DualViewNet on an AP image plus an optional lateral.
+          The fusion weights are in inference.py (0.48 classical, 0.42 CNN, plus a small lateral step-off bump).
+          Every scan returns uncalibrated scores, Grad-CAM, a radial chart, and a research readout. It does not
+          return a care plan.
         </p>
         <p>
           <Link href="/architecture">Architecture</Link>

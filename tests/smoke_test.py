@@ -39,11 +39,18 @@ def test_halo_analyzer():
 
 
 def test_clinical_protocol():
-    from haloscan.clinical import build_protocol
-    p = build_protocol(0.8, ambiguous=False, has_lateral=True)
-    assert p.urgency == "CRITICAL"
-    p2 = build_protocol(0.1, ambiguous=False, has_lateral=False)
-    assert p2.urgency == "ROUTINE"
+    from haloscan.clinical import HOTLINE, build_protocol
+    p = build_protocol(0.8, ambiguous=False, has_lateral=True, coin_prob=0.2)
+    assert p.research_label == "BATTERY-LIKE PATTERN"
+    actions = " ".join(p.actions).lower()
+    assert "discharge" not in actions
+    assert "endoscopy" not in actions
+    assert "npo" not in actions
+    assert "recommend discharge" in p.safety.lower()
+    assert HOTLINE in " ".join(p.contacts)
+    p2 = build_protocol(0.1, ambiguous=False, has_lateral=False, coin_prob=0.8)
+    assert p2.research_label == "COIN-LIKE PATTERN"
+    assert "does not rule out" in " ".join(p2.actions).lower()
 
 
 def test_report_generation():
@@ -63,7 +70,11 @@ def test_report_generation():
         gradcam_b64="data:image/png;base64,abc", dual_view_used=False,
     )
     html = generate_html_report(r)
-    assert "Haloscan" in html and "CRITICAL" in html
+    assert "Haloscan" in html or "HaloScan" in html
+    assert "1-800-498-8666" in html
+    assert "Clinical Protocol" not in html
+    assert "npo" not in html.lower()
+    assert "does not diagnose" in html.lower()
 
 
 def test_inference_pipeline():
