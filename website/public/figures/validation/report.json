@@ -1,19 +1,23 @@
 {
   "metrics": {
+    "clinical_accuracy": false,
+    "beats_baseline_battery_sensitivity": false,
+    "comparison_note": "Superseded by docs/eval/eval_report.json. The figures below are older synthetic point estimates. They are not clinical accuracy and were not reproduced when a synthetic lateral was attached (coin-pattern rate 0.0 on the 2026-10-11 holdout). They are not a comparison that shows HaloScan outperforming Emory 2020.",
     "haloscan": {
       "battery_sensitivity": 1.0,
       "coin_sensitivity": 1.0,
       "stacked_coin_emergency_rate": 0.95,
-      "n_per_class": 40
+      "n_per_class": 40,
+      "note": "Legacy point estimates from an earlier AP-focused synthetic run."
     },
     "baseline_emory_2020": {
-      "source": "Emory SPR 2020 (Rostad et al.)",
+      "source": "Emory SPR 2020 (Rostad et al.) \u2014 cited for context only",
       "battery_sensitivity": 0.81,
       "battery_specificity": 0.92,
       "coin_sensitivity": 0.83,
-      "overall_accuracy": 0.88
-    },
-    "beats_baseline_battery_sensitivity": true
+      "overall_accuracy": 0.88,
+      "note": "Different dataset and methods. Not a head-to-head with HaloScan."
+    }
   },
   "confusion_matrix": {
     "classes": [
@@ -77,5 +81,7 @@
     }
   ],
   "ci_workflow": "Haloscan Tests (.github/workflows/test.yml)",
-  "eval_command": "python3 -m haloscan.evaluate --n 40"
+  "eval_command": "python3 -m haloscan.evaluate --n 40",
+  "clinical_accuracy": false,
+  "comparison_note": "Superseded by docs/eval/eval_report.json. The figures below are older synthetic point estimates. They are not clinical accuracy and were not reproduced when a synthetic lateral was attached (coin-pattern rate 0.0 on the 2026-10-11 holdout). They are not a comparison that shows HaloScan outperforming Emory 2020."
 }
