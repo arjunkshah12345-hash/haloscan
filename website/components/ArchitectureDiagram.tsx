@@ -79,7 +79,7 @@ export function ArchitectureDiagram() {
           + dual-view bonus
         </text>
         <text x="452" y="214" fontSize="11" fontFamily="Times New Roman, Times, serif" fill="#333">
-          Ambiguity → emergency
+          Ambiguity → research flag
         </text>
         <text x="452" y="238" fontSize="11" fontFamily="Times New Roman, Times, serif" fill="#555" fontStyle="italic">
           inference.py
@@ -88,11 +88,11 @@ export function ArchitectureDiagram() {
         {/* Outputs */}
         <rect x="640" y="40" width="160" height="340" fill="#fff" stroke="#111" strokeWidth="1.5" />
         <text x="720" y="64" textAnchor="middle" fontSize="13" fontFamily="Times New Roman, Times, serif" fontWeight="700">
-          Clinical outputs
+          Research outputs
         </text>
         {[
-          "Battery / coin verdict",
-          "Confidence & probabilities",
+          "Battery / coin pattern label",
+          "Uncalibrated component scores",
           "Grad-CAM heatmap",
           "Detection overlay",
           "Radial profile chart",
@@ -127,8 +127,8 @@ export function ArchitectureDiagram() {
       </svg>
       <figcaption className="figure-caption">
         <strong>Figure A.</strong> End-to-end Haloscan architecture. Two parallel analysis branches feed an
-        ensemble layer that prioritizes battery sensitivity; ambiguous halo cases trigger conservative emergency
-        protocols regardless of coin probability.
+        ensemble layer. Ambiguous halo cases raise a research flag. That flag is not a treatment order and is not
+        a clinical disposition.
       </figcaption>
     </figure>
   );

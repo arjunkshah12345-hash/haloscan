@@ -1,5 +1,8 @@
 # How to Win with Haloscan
 
+> **Partially outdated.** Prefer [`JUDGE_GUIDE.md`](JUDGE_GUIDE.md), [`SUBMISSION_FINAL.md`](SUBMISSION_FINAL.md), and [`VIDEO_FINAL.md`](VIDEO_FINAL.md).
+> Do not use the 409–2 vote claim, CRITICAL-protocol demo language, or Emory-outperformance talking points in this file.
+
 You're not competing nationally. You need to **win your district** — typically 20–80 apps. Haloscan is built to score high on all three rubric criteria. This doc tells you exactly how to maximize each.
 
 ---

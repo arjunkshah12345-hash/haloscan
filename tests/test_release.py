@@ -1,13 +1,15 @@
 """Release checks that do not need a full evaluation run."""
 
 import io
+import json
 import sys
 from pathlib import Path
 
 import numpy as np
 from PIL import Image
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
 
 from fastapi import HTTPException
 
@@ -69,12 +71,41 @@ def test_decode_rejects_garbage_and_oversize():
     _raises(415, lambda: decode_image_bytes(buf.getvalue(), "text/html"))
 
 
+def test_prerecorded_demos_are_research_readouts():
+    banned = (
+        "CRITICAL",
+        "URGENT",
+        "ROUTINE",
+        "202-625-3333",
+        "NPO",
+        "Stat pediatric",
+        "Primary pediatrician follow-up",
+    )
+    for name in ("battery", "coin", "stacked", "normal"):
+        data = json.loads((ROOT / "website" / "public" / "demos" / f"{name}.json").read_text())
+        protocol = data.get("protocol") or {}
+        blob = json.dumps(protocol)
+        for token in banned:
+            assert token not in blob, f"{name} still contains {token}"
+        assert HOTLINE in blob
+        assert data.get("inference_source") == "prerecorded_research_demo"
+        assert protocol.get("urgency") not in ("CRITICAL", "URGENT", "ROUTINE")
+
+
+def test_legacy_metrics_do_not_claim_emory_win():
+    metrics = json.loads((ROOT / "weights" / "metrics.json").read_text())
+    assert metrics.get("clinical_accuracy") is False
+    assert metrics.get("beats_baseline_battery_sensitivity") is False
+
+
 if __name__ == "__main__":
     tests = [
         test_wilson_interval_does_not_pretend_forty_of_forty_is_certainty,
         test_protocol_never_gives_disposition_orders,
         test_shifted_sample_stays_in_range,
         test_decode_rejects_garbage_and_oversize,
+        test_prerecorded_demos_are_research_readouts,
+        test_legacy_metrics_do_not_claim_emory_win,
     ]
     failed = 0
     for test in tests:

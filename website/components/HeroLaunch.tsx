@@ -6,11 +6,11 @@ export function HeroLaunch() {
     <section className="hero-launch dither-panel" aria-label="Quick start">
       <div className="hero-launch-inner">
         <div className="hero-launch-copy">
-          <p className="hero-eyebrow">Congressional App Challenge 2026 · Live ML</p>
-          <h2 className="hero-title">Reese&apos;s Law fixed packaging. Haloscan fixes the X-ray.</h2>
+          <p className="hero-eyebrow">Congressional App Challenge 2026 · Research prototype</p>
+          <h2 className="hero-title">Reese&apos;s Law fixed packaging. HaloScan measures synthetic discs.</h2>
           <p className="hero-desc">
-            Real PyTorch + OpenCV ensemble. Press <kbd>1</kbd> then <kbd>3</kbd> on the scanner — the
-            stacked-coin trap judges should see.
+            Real PyTorch + OpenCV ensemble on drawn X-ray-style images. Press <kbd>1</kbd> then <kbd>3</kbd> on
+            the scanner — the stacked-coin case judges should see. Not a medical device.
           </p>
           <div className="cta-row">
             <Link href="/scan?judge=1" className="btn btn-dither">
@@ -25,10 +25,10 @@ export function HeroLaunch() {
           <DitherBenchmark />
           <div className="hero-stats-compact">
             <span>
-              <strong>409–2</strong> Reese&apos;s Law
+              <strong>Synthetic</strong> holdout labeled
             </span>
             <span>
-              <strong>~2 hr</strong> esophageal window
+              <strong>Research</strong> flag only
             </span>
           </div>
         </div>

@@ -57,7 +57,8 @@ No licensed, de-identified pediatric radiograph set was in the repository. No ex
 
 - Render cold starts. The scanner now keeps prerecorded demos available and labels them.
 - CORS previously allowed every origin. It is now limited to the Vercel app, preview hosts matching `haloscan*.vercel.app`, and local dev ports.
-- `weights/metrics.json` on the deployed API will keep serving the old comparison until this tree is deployed. The new site prefers `eval_report.json`.
+- As of 2026-10-11 evening, Vercel serves the research UI; Render `/api/health` still reports version **2.2.0** while the repo is **2.4.0**. The Next.js proxy rewrites labels until Render is redeployed. Render CLI auth on the release machine is expired (`render login` required).
+- `weights/metrics.json` in the repo no longer claims Emory outperformance. The public site prefers `eval_report.json` for `/api/metrics`.
 
 ## Security and privacy
 

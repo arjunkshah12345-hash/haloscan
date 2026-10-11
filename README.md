@@ -57,7 +57,7 @@ pip install -r requirements.txt
 ./scripts/run.sh
 ```
 
-Open **http://localhost:7860** — upload AP + lateral X-rays, get verdict + Grad-CAM + clinical report.
+Open **http://localhost:7860** — upload AP + optional lateral images, get a research readout, Grad-CAM, and a printable report. Scores are uncalibrated and not a diagnosis.
 
 Weights ship in `weights/haloscan.pt`. No API keys. Runs **offline**.
 
@@ -67,15 +67,14 @@ Weights ship in `weights/haloscan.pt`. No API keys. Runs **offline**.
 
 ```
 ┌─────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│  AP X-ray   │────▶│  Halo analyzer   │────▶│                 │
+│  AP image   │────▶│  Halo analyzer   │────▶│                 │
 │  (CLAHE)    │     │  radial profile  │     │   Ensemble      │
-└─────────────┘     └──────────────────┘     │   CV 55%        │
-┌─────────────┐     ┌──────────────────┐     │   CNN 40%       │──▶ Verdict
-│  Lateral    │────▶│  Step-off detect │────▶│   dual bonus    │    Grad-CAM
-└─────────────┘     └──────────────────┘     │                 │    Protocol
+└─────────────┘     └──────────────────┘     │   CV + CNN      │
+┌─────────────┐     ┌──────────────────┐     │   dual bonus    │──▶ Research label
+│  Lateral    │────▶│  Step-off detect │────▶│   ambiguity     │    Grad-CAM
+└─────────────┘     └──────────────────┘     │                 │    Uncertainty
                               │               └────────▲────────┘
                               └──── DualViewNet ───────┘
-                                    (3× battery loss)
 ```
 
 <details>
@@ -86,8 +85,9 @@ Weights ship in `weights/haloscan.pt`. No API keys. Runs **offline**.
 | `haloscan/halo_analyzer.py` | Radial halo profiling, Hough fallback |
 | `haloscan/models.py` | DualViewNet — AP + lateral fusion |
 | `haloscan/inference.py` | Ensemble, Grad-CAM, stacked-coin heuristics |
-| `haloscan/clinical.py` | CRITICAL / URGENT / ROUTINE protocol engine |
-| `haloscan/report.py` | Printable HTML clinical reports |
+| `haloscan/clinical.py` | Research readout and uncertainty (no care orders) |
+| `haloscan/report.py` | Printable HTML research report |
+| `haloscan/eval_suite.py` | Holdout, shifted set, ablations, Wilson intervals |
 
 </details>
 
@@ -96,15 +96,15 @@ Weights ship in `weights/haloscan.pt`. No API keys. Runs **offline**.
 ## Project layout
 
 ```
-haloscan/          # Python ML + clinical engine
+haloscan/          # Python ML + research readout
 api/               # FastAPI backend
-static/            # Full clinical web UI (upload + inference)
-website/           # Marketing site → Vercel
+static/            # Local web UI (upload + inference)
+website/           # Public site → Vercel
 weights/           # Bundled model weights (~3.5 MB)
+docs/              # Audit, evaluation artifact, verification
 kaggle/            # CPU training notebook
-tests/             # Smoke tests
+tests/             # Smoke + release tests
 ```
-
 ---
 
 ## Training
@@ -138,21 +138,24 @@ cd website && npm run dev                # marketing site
 
 ## Congressional App Challenge 2026
 
-Built to connect **federal legislation** (Reese's Law, P.L. 117-171) to an unsolved clinical failure mode with production-grade code.
+A student research prototype about measuring battery-like and coin-like patterns on synthetic images, with honest synthetic limits and no clinical claims.
 
 | Resource | Link |
 |----------|------|
 | Live demo | https://haloscan-cac.vercel.app/scan |
-| Judge guide | https://haloscan-cac.vercel.app/judges |
+| Judge guide | https://haloscan-cac.vercel.app/judges · [`JUDGE_GUIDE.md`](JUDGE_GUIDE.md) |
 | API (Render) | https://haloscan.onrender.com |
-| Submission copy | [`SUBMISSION_FORM.md`](SUBMISSION_FORM.md) |
-| Video script | [`VIDEO.md`](VIDEO.md) |
+| Submission copy | [`SUBMISSION_FINAL.md`](SUBMISSION_FINAL.md) |
+| Video script | [`VIDEO_FINAL.md`](VIDEO_FINAL.md) |
+| Release checklist | [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) |
+
+Older drafts (`SUBMISSION_FORM.md`, `VIDEO.md`, `WIN.md`) are superseded. Do not paste them into the entry form.
 
 ---
 
 ## Disclaimer
 
-**Decision support / research only.** Not a medical device. Not FDA cleared.
+**Experimental research prototype only.** Not a medical device. Not FDA cleared. Not clinically validated.
 
 Suspected button battery ingestion → emergency services · Poison Help **1-800-222-1222** · National Battery Ingestion Hotline **1-800-498-8666**
 

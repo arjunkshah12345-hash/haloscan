@@ -1,5 +1,8 @@
 # Haloscan — Video Guide
 
+> **SUPERSEDED for the timed CAC script.** Use [`VIDEO_FINAL.md`](VIDEO_FINAL.md).
+> This file still has Manim export notes. Do not use the older “fixes diagnosis” / Emory-superiority voiceover lines.
+
 ## Manim explainer (3Blue1Brown-style) — SILENT for your voiceover
 
 ```bash
