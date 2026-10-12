@@ -13,6 +13,8 @@ website/node_modules/
 website/.next/
 website/.vercel/
 website/.env.local
+website/tsconfig.tsbuildinfo
+*.tsbuildinfo
 media/
 renders/*.tmp.mp4
 renders/*.mp4

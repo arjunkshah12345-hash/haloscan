@@ -1,6 +1,8 @@
 # Haloscan — Production Deployment
 
-**Status: LIVE** — primary URL `https://haloscan-cac.vercel.app` (ideatr.dev domain expired Aug 31 2026; renew to restore haloscan.ideatr.dev)
+**Frontend: LIVE** on `https://haloscan-cac.vercel.app` (commit on Vercel tracks recent scanner/home work).
+
+**API: PARTIAL** — `https://haloscan.onrender.com/api/health` still reports version **2.2.0** while `api/main.py` is **2.4.0**. The Next.js proxy rewrites research labels until Render is redeployed. Render CLI token on this machine is expired (`render login` required).
 
 | Layer | URL | Host |
 |-------|-----|------|

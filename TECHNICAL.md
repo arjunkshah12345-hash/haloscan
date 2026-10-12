@@ -1,92 +1,88 @@
 # Haloscan — Technical Documentation
 
-For Congressional App Challenge judges evaluating **coding depth**.
+For Congressional App Challenge judges evaluating coding depth.
+
+HaloScan is an **experimental research prototype**. Numbers below are from a procedural synthetic generator unless a section says otherwise. They are not clinical sensitivity and are not a comparison with Emory 2020.
 
 ## Problem statement
 
-After Reese's Law (P.L. 117-171), button battery packaging became child-resistant. The **diagnostic gap** remains: on pediatric chest X-rays, button batteries and coins appear as radiopaque discs. The "double halo sign" distinguishes batteries on AP view — but **stacked coins create false halos**. Esophageal battery impaction requires endoscopy within ~2 hours.
+[Reese's Law](https://www.congress.gov/bill/117th-congress/house-bill/5313) (Public Law 117-171, August 16, 2022) requires safer packaging, labels, and battery compartments. It is a prevention statute, not a diagnostic product.
 
-**Published baseline:** Rostad et al., Emory SPR 2020 — YOLOv2 on 228 images, 81% battery sensitivity, 88% overall accuracy. Never deployed clinically.
+On pediatric chest radiographs, button batteries and coins can both look like radiopaque discs. Radiologists may look for a "double halo" on an AP film. Stacked coins can mimic that pattern. Suspected button-battery ingestion needs emergency care regardless of any app score.
+
+A 2020 Emory SPR abstract (Rostad et al.) reported a YOLOv2 model on 228 radiographs. HaloScan's synthetic metrics are not a head-to-head with that study.
 
 ## Architecture
 
 ```
 ┌─────────────┐     ┌──────────────────┐
-│  AP X-ray   │────►│ CLAHE + invert   │────► Radial halo profiler
+│  AP image   │────►│ CLAHE + invert   │────► Radial halo profiler
 └─────────────┘     └──────────────────┘              │
-                                                        ├──► Ensemble ──► Verdict
+                                                        ├──► Ensemble ──► Research label
 ┌─────────────┐     ┌──────────────────┐              │         │
 │  Lateral    │────►│ Step-off analyzer│──────────────┘         ├──► Grad-CAM
 └─────────────┘     └──────────────────┘                        │
-                                                        DualViewNet ──► Protocol engine
+                                                        DualViewNet ──► Uncertainty
 ```
 
 ### 1. Computer vision layer (`halo_analyzer.py`)
 
 - **Disc localization:** Otsu thresholding → contour circularity scoring → Hough circle fallback → adaptive threshold fallback
 - **Radial profile:** Sample intensity at increasing radii from disc center; normalize to [0,1]
-- **Halo score:** Detect dip between inner peaks (lucent ring of battery rim)
-- **Multi-peak detector:** Counts radial intensity peaks — stacked coins often show 3+ rings on AP without lateral step-off (`stacked_mimic_score`)
-- **Step-off score:** Vertical mass asymmetry on lateral view (battery pole geometry)
+- **Halo score:** Detect dip between inner peaks (lucent ring of a battery rim on the drawing)
+- **Multi-peak detector:** Counts radial intensity peaks — stacked coins often show extra rings on AP (`stacked_mimic_score`)
+- **Step-off score:** Vertical mass asymmetry on a lateral view
 
 ### 2. Neural network layer (`models.py`)
 
-- **HaloscanNet:** Single-view 3-block CNN (32→64→128 channels)
-- **DualViewNet:** Twin encoders + fusion MLP — lateral view reduces stacked-coin false positives
-- **Battery-weighted loss:** `CrossEntropyLoss(weights=[2.5, 1.4, 0.5])` — missing a battery costs more than missing a coin
+- **ViewEncoder:** 3-block CNN (32→64→128 channels) with adaptive pool to a 128-d vector
+- **DualViewNet:** Twin encoders + input concat to 256 → MLP 256→128→3. A missing lateral is a zero vector
+- Training uses battery-weighted cross-entropy. Stacked coins are labeled as the battery class in the current generator pipeline
 
 ### 3. Ensemble fusion (`inference.py`)
 
+Approximate fusion (see source for exact constants):
+
 ```
-battery_prob = 0.50·CV + 0.40·CNN + 0.10·(1 - coin_CNN) + dual_bonus
+battery_score ≈ w_cv·CV + w_cnn·CNN + dual_bonus + ambiguity heuristics
 ```
 
-Ambiguity rule: `halo > 0.40 AND stepoff < 0.38` → flag as emergency regardless of coin probability.
+Ambiguity / stacked-mimic rules can raise a **research flag**. That flag is not a treatment order and must not be read as a clinical disposition.
 
 ### 4. Explainability (`gradcam.py`)
 
-Gradient-weighted Class Activation Mapping on the final conv block, target class = battery. Overlaid on original X-ray for clinician trust.
+Gradient-weighted Class Activation Mapping on the final conv block, typically targeting the battery class. Overlaid for inspection of what the network attended to on a synthetic image.
 
-### 5. Clinical protocol (`clinical.py`)
+### 5. Research readout (`clinical.py`)
 
-Rule-based engine mapping probability + ambiguity → CRITICAL / URGENT / ROUTINE with action checklists and hotlines.
+Maps scores and ambiguity into a research label (`BATTERY-LIKE PATTERN`, `COIN-LIKE PATTERN`, `AMBIGUOUS PATTERN`, `NO DISC PATTERN`) plus uncertainty notes and hotline contacts. It does **not** emit CRITICAL / URGENT / ROUTINE care pathways, discharge language, or endoscopy orders.
 
-## Training data & Kaggle pipeline
+## Training data
 
-Synthetic generator (`synthetic.py`) — no PHI, no downloads. **All training on Kaggle GPU** via `kaggle/haloscan_train.ipynb`:
+Synthetic generator (`synthetic.py`) — no PHI. Disc drawings on a stick-figure background. AP and lateral pairs are independent draws, not two projections of one physical object. That pairing artifact is a known limitation: on the 2026-10-11 holdout, attaching a separate synthetic lateral made the dual-view CNN call every coin battery-like.
 
-1. Clone repo to `/kaggle/working/` only
-2. Train DualViewNet (400 samples/class, 20 epochs, battery-weighted loss)
-3. Upload `haloscan.pt` + `metrics.json` to Hugging Face Hub
-4. HF Spaces inference pulls weights — never trains locally
+## Evaluation
 
-See `kaggle/README.md`.
+Prefer `python3 -m haloscan.eval_suite --n 40` and the artifact in `docs/eval/eval_report.json`.
 
-## Evaluation (`evaluate.py`)
+That suite reports:
 
-Synthetic holdout with fixed seeds. Metrics:
-- Battery sensitivity (dual-view)
-- Coin sensitivity
-- Stacked-coin emergency catch rate
-- Comparison vs Emory 2020 baseline
+- Holdout and distribution-shifted synthetic sets
+- Ablations (CNN-only, CV-only, ensemble, AP-only, AP+lateral, ensemble without ambiguity rules)
+- Confusion-style counts, precision / recall / specificity / F1 for the research flag
+- Wilson intervals, threshold curves, CPU latency
+- Weights SHA-256 and git commit
+
+Do not treat point estimates on 40 drawn images per class as clinical accuracy.
 
 ## API surface
 
 | Route | Purpose |
 |-------|---------|
 | `POST /api/analyze` | Full inference pipeline |
-| `POST /api/report` | Downloadable HTML clinical report |
-| `GET /api/demo/{case}` | Synthetic test cases |
-| `GET /api/metrics` | Cached benchmark (1hr TTL) |
+| `POST /api/report` | Downloadable HTML research report |
+| `GET /api/demo/{case}` | Synthetic demo cases |
+| `GET /api/metrics` | Evaluation artifact or legacy point estimates |
+| `GET /api/health` | Process and model load status |
 
-## What we'd do with real data
-
-1. Fine-tune on de-identified institutional foreign-body series (IRB)
-2. External validation on Hopkins RFO Bench (144 critical RFO cases)
-3. Prospective reader study: ML-assisted vs unassisted radiologist accuracy
-
-## References
-
-- Reese's Law: 15 U.S.C. § 2056e (P.L. 117-171)
-- Rostad CA et al. Pediatric Radiol. 2020 — ML for battery/coin detection
-- Litovitz T et al. — National Battery Ingestion Hotline data
+Public site: https://haloscan-cac.vercel.app · API: https://haloscan.onrender.com

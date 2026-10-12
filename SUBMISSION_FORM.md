@@ -1,4 +1,8 @@
 # Haloscan — Congressional App Challenge Submission Form
+
+> **SUPERSEDED.** Use [`SUBMISSION_FINAL.md`](SUBMISSION_FINAL.md) for the entry form.
+> This older draft overstated clinical claims and must not be pasted into the portal.
+
 ## Copy-paste ready · October 26, 2026 deadline (12 PM Eastern)
 
 Fill at: https://www.congressionalappchallenge.us/
