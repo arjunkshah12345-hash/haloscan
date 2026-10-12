@@ -61,3 +61,15 @@ curl -sS https://haloscan.onrender.com/api/health   # expect version 2.4.0 after
 - Student phone browser pass.
 - Student video recording and portal submit.
 - `pip-audit` clean bill (not claimed).
+
+
+## Live hosts rechecked after PR #2 deploy (2026-10-11 evening)
+
+| Check | Result |
+|---|---|
+| https://haloscan-cac.vercel.app/scan title | Research Scanner (alias pointed at production deploy `website-pn2qe2f0u`) |
+| `/api/demo/battery` via Vercel | Live inference, research label `BATTERY-LIKE PATTERN`, hotline present, no CRITICAL |
+| https://haloscan.onrender.com/api/health | 200, still version **2.2.0** (repo is 2.4.0) |
+| PR https://github.com/arjunkshah12345-hash/haloscan/pull/2 | OPEN, MERGEABLE, smoke CI SUCCESS |
+
+Manual Render redeploy remains the API blocker: `render login` then `render deploys create srv-da4tc1jm8hqs73anthk0 --confirm`.
