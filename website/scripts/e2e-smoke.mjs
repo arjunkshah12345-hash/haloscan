@@ -15,7 +15,7 @@ async function main() {
   await page.goto(`${base}/`, { waitUntil: "networkidle", timeout: 60000 });
   await page.getByRole("link", { name: /Explore the Demo/i }).first().click();
   await page.waitForURL(/\/scan/);
-  await page.getByRole("button", { name: /Battery-like/i }).click();
+  await page.locator(".case-tile").filter({ hasText: "Battery-like" }).click();
   await page.waitForSelector(".verdict-title", { timeout: 90000 });
   const source = await page.locator(".badge-live, .badge-prerecorded").first().innerText();
   const verdict = await page.locator(".verdict-title").innerText();
