@@ -116,3 +116,24 @@ if __name__ == "__main__":
             print(f"FAIL {test.__name__}: {exc}")
             failed += 1
     sys.exit(failed)
+
+
+def test_dual_view_collapse_guard_recovers_coin_on_ensemble():
+    """DualViewNet alone collapses coin+lateral; ensemble must recover."""
+    import cv2
+    from haloscan.inference import HaloscanEngine
+    from haloscan.synthetic import generate_sample
+
+    eng = HaloscanEngine()
+
+    def rgb(g):
+        return cv2.cvtColor((g * 255).astype("uint8"), cv2.COLOR_GRAY2RGB)
+
+    ap = rgb(generate_sample(1, seed=500_010))
+    lat = rgb(generate_sample(1, lateral=True, seed=500_510))
+    cnn = eng.analyze(ap, lat, mode="cnn", explain=False)
+    ens = eng.analyze(ap, lat, mode="ensemble", explain=False)
+    assert cnn.battery_probability > 0.9
+    assert "COIN" in ens.prediction
+    assert ens.battery_probability < 0.5
+    assert "Dual-view CNN" in ens.explanation

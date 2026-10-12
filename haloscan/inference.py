@@ -61,8 +61,13 @@ class HaloscanEngine:
             lat_gray = enhance_xray(load_image(lateral_image))
             lat_halo = analyze_halo(lat_gray, view="lateral")
 
-        model_p = self._model_probs(ap_gray, lat_gray)
         dual_used = lat_gray is not None
+        # Always score the AP-only branch. DualViewNet on independently drawn
+        # synthetic laterals was measured (2026-10-11 holdout) to collapse the
+        # coin class to ~1.0 battery; AP-only CNN + classical still separate coins.
+        ap_model_p = self._model_probs(ap_gray, None)
+        dual_model_p = self._model_probs(ap_gray, lat_gray) if dual_used else ap_model_p
+        model_p = dual_model_p
 
         cv_battery = ap_halo.battery_score
         cv_coin = ap_halo.coin_score
@@ -74,10 +79,35 @@ class HaloscanEngine:
         cnn_battery = model_p.get("battery", 0.0)
         cnn_coin = model_p.get("coin", 0.0)
 
+        dual_collapse_guard = False
+        # Guard only the ensemble path. Ablation mode `cnn` must still expose
+        # DualViewNet's raw dual-view collapse on independent synthetic laterals.
+        if dual_used and mode in {"ensemble", "no_ambiguity"}:
+            dual_says_battery = dual_model_p.get("battery", 0.0) >= dual_model_p.get("coin", 0.0)
+            ap_says_coin = ap_model_p.get("coin", 0.0) > ap_model_p.get("battery", 0.0)
+            cv_says_coin = (
+                ap_halo.coin_score >= ap_halo.battery_score
+                and ap_halo.halo_score < 0.38
+                and ap_halo.stacked_mimic_score < 0.42
+            )
+            # When DualViewNet contradicts both AP-only CNN and classical coin
+            # evidence, trust the AP branch for fusion. Lateral step-off from
+            # classical CV remains available for battery support below.
+            if dual_says_battery and ap_says_coin and cv_says_coin:
+                dual_collapse_guard = True
+                model_p = ap_model_p
+                cnn_battery = ap_model_p.get("battery", 0.0)
+                cnn_coin = ap_model_p.get("coin", 0.0)
+
         # Ensemble weights are the implementation, not a calibrated probability.
         bat = 0.48 * cv_battery + 0.42 * cnn_battery + 0.10 * (1 - cnn_coin)
         coin = 0.48 * cv_coin + 0.52 * cnn_coin
-        if dual_used and lat_halo is not None and lat_halo.stepoff_score > 0.35:
+        if (
+            dual_used
+            and not dual_collapse_guard
+            and lat_halo is not None
+            and lat_halo.stepoff_score > 0.35
+        ):
             bat += 0.06
 
         if mode == "cnn":
@@ -151,7 +181,13 @@ class HaloscanEngine:
         emergency = bool(research_flag)
 
         explanation = ap_halo.explanation
-        if lat_halo is not None and lat_halo.stepoff_score > 0.42:
+        if dual_collapse_guard:
+            explanation += (
+                " Dual-view CNN predicted battery-like while AP-only CNN and classical"
+                " profiling agreed on a coin-like disc; fusion used the AP-only network"
+                " scores (measured DualViewNet failure mode on independent synthetic laterals)."
+            )
+        if lat_halo is not None and lat_halo.stepoff_score > 0.42 and not dual_collapse_guard:
             explanation += " Lateral step-off score is high on this synthetic lateral."
         elif lat_halo is not None and lat_halo.stepoff_score < 0.22 and ap_halo.halo_score > 0.38:
             explanation += " AP halo without a high lateral step-off — stacked coins remain in the differential."

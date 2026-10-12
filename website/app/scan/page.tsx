@@ -1,11 +1,11 @@
 import { Suspense } from "react";
 import { ScanApp } from "@/components/ScanApp";
-import "../scan/scan.css";
+import "./scan.css";
 
 export const metadata = {
   title: "HaloScan — Research Scanner",
   description:
-    "Experimental PyTorch + OpenCV ensemble on synthetic X-ray-style images. Press 1 for battery, 3 for stacked coins. Not a medical device. Congressional App Challenge 2026.",
+    "Experimental PyTorch + OpenCV ensemble on synthetic X-ray-style images. Press 1 for battery, 3 for stacked coins. Not a medical device.",
 };
 
 function ScanFallback() {

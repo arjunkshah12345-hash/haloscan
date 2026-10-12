@@ -2,9 +2,9 @@ import fs from "fs";
 import path from "path";
 import Link from "next/link";
 import { MinimalFigure } from "@/components/MinimalFigure";
-import { Nav } from "@/components/Nav";
 import { ReadMore } from "@/components/ReadMore";
 import type { CaseId } from "@/components/CaseFigure";
+import { DocShell } from "@/components/DocShell";
 
 type CaseMeta = {
   id: CaseId;
@@ -32,8 +32,7 @@ export default function GalleryPage() {
   const cases = loadManifest();
 
   return (
-    <div className="page">
-      <Nav />
+    <DocShell>
 
       <h1>Figure gallery</h1>
       <p className="lede">All panels exported from the live PyTorch pipeline. Scanner keys 1–4 match these cases.</p>
@@ -71,12 +70,6 @@ export default function GalleryPage() {
 python3 scripts/export_figures.py
 python3 scripts/export_validation_figures.py`}</pre>
       </ReadMore>
-
-      <footer>
-        <p>
-          <Link href="/">← Home</Link>
-        </p>
-      </footer>
-    </div>
+    </DocShell>
   );
 }

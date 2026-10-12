@@ -20,7 +20,7 @@ from haloscan.visualize import numpy_to_b64  # noqa: E402
 
 CASES = {
     "battery": (0, True),
-    "coin": (1, False),
+    "coin": (1, True),  # include lateral to demonstrate dual-view collapse guard
     "stacked": (2, False),
     "normal": (3, False),
 }
@@ -40,13 +40,17 @@ def main() -> None:
         ap_rgb = cv2.cvtColor((ap * 255).astype(np.uint8), cv2.COLOR_GRAY2RGB)
         lat_rgb = None
         lat_preview = None
-        if with_lat and label == 0:
-            lat = generate_sample(0, lateral=True, seed=43)
+        if with_lat and label in (0, 1):
+            lat = generate_sample(label, lateral=True, seed=43)
             lat_rgb = cv2.cvtColor((lat * 255).astype(np.uint8), cv2.COLOR_GRAY2RGB)
             lat_preview = gray_preview(lat)
 
         result = engine.analyze(ap_rgb, lat_rgb)
         payload = result.to_dict()
+        payload["inference_source"] = "prerecorded_research_demo"
+        payload["synthetic_demo"] = True
+        payload["scores_are_calibrated_probabilities"] = False
+        payload["clinical_use"] = "not_a_diagnosis"
         payload["ap_preview"] = gray_preview(ap)
         payload["lateral_preview"] = lat_preview
         path = OUT / f"{case}.json"
@@ -57,7 +61,8 @@ def main() -> None:
         "cases": [
             {"id": k, "title": k.replace("_", " ").title()} for k in CASES
         ],
-        "version": "2.2.0",
+        "version": "2.5.0",
+        "note": "Prerecorded synthetic demos. Not live inference.",
     }
     (OUT / "index.json").write_text(json.dumps(meta, indent=2))
     print(f"Done → {OUT}")

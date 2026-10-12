@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Nav } from "@/components/Nav";
 import { ReadMore } from "@/components/ReadMore";
+import { DocShell } from "@/components/DocShell";
 
 const MODULES = [
   { file: "halo_analyzer.py", title: "Radial halo profiler + multi-peak stacked-coin detector" },
@@ -13,8 +13,7 @@ const MODULES = [
 
 export default function ArchitecturePage() {
   return (
-    <div className="page">
-      <Nav />
+    <DocShell current="architecture">
 
       <h1>Architecture</h1>
       <p className="lede">OpenCV radial profiling fused with DualViewNet. Numbers below are the ones in the code, not a simplified diagram.</p>
@@ -61,12 +60,6 @@ The ambiguity path is a research flag. It is not a clinical order.`}</pre>
         {" · "}
         <a href="https://github.com/arjunkshah12345-hash/haloscan/blob/main/TECHNICAL.md">TECHNICAL.md</a>
       </p>
-
-      <footer>
-        <p>
-          <Link href="/">← Home</Link>
-        </p>
-      </footer>
-    </div>
+    </DocShell>
   );
 }

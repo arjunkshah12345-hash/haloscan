@@ -345,9 +345,11 @@ def run_suite(
             "shift_description": "generate_shifted_sample: smaller frame, edge-biased placement, gamma, JPEG quality 30-55, extra noise, and a dark bar.",
             "pairing": (
                 "AP and lateral are separate random draws with related seeds, not a projective pair of one object. "
-                "On the 2026-10-11 holdout, attaching those laterals made the dual-view CNN call every synthetic coin a battery "
-                "(coin-pattern rate 0.0 with a lateral, 1.0 on the same AP images without one). "
-                "The previously published 100% coin figure is not reproduced under this paired protocol."
+                "On the 2026-10-11 holdout, DualViewNet alone called every synthetic coin a battery when a lateral "
+                "was attached (cnn_only coin-pattern rate 0.0). Classical AP and AP-only CNN still separated coins. "
+                "As of 2026-10-12 the ensemble applies a dual-view collapse guard: when DualViewNet predicts battery "
+                "but AP-only CNN and classical profiling agree on coin, fusion uses AP-only network scores. "
+                "The cnn_only ablation still reports the raw DualViewNet failure."
             ),
             "leakage": (
                 "The shipped checkpoint was fit by build_dataset without a fixed seed, so exact image identity "

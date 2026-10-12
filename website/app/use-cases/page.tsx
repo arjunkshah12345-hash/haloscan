@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { MinimalFigure } from "@/components/MinimalFigure";
-import { Nav } from "@/components/Nav";
 import { ReadMore } from "@/components/ReadMore";
+import { DocShell } from "@/components/DocShell";
 
 const CASES = [
   {
@@ -29,8 +29,7 @@ const CASES = [
 
 export default function UseCasesPage() {
   return (
-    <div className="page">
-      <Nav />
+    <DocShell>
 
       <h1>Synthetic examples</h1>
       <p className="lede">Four drawn cases mapped to scanner keys 1–4. They are not patient histories.</p>
@@ -52,12 +51,6 @@ export default function UseCasesPage() {
           <li>Rural / tele-radiology — decision support when pediatric expertise is off-site</li>
         </ul>
       </ReadMore>
-
-      <footer>
-        <p>
-          <Link href="/">← Home</Link>
-        </p>
-      </footer>
-    </div>
+    </DocShell>
   );
 }
