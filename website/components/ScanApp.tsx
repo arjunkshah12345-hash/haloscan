@@ -113,7 +113,10 @@ const SAFETY =
 
 function researchLabel(r: Result): string {
   if (r.protocol?.research_label) return r.protocol.research_label;
-  if (r.ambiguous || r.stacked_mimic) return "AMBIGUOUS PATTERN";
+  if (r.ambiguous || r.stacked_mimic) {
+    if (/coin/i.test(r.prediction) && !/battery/i.test(r.prediction)) return "AMBIGUOUS — COIN-LEANING";
+    return "AMBIGUOUS — BATTERY-LIKE PATTERN";
+  }
   if (/battery/i.test(r.prediction)) return "BATTERY-LIKE PATTERN";
   if (/coin/i.test(r.prediction)) return "COIN-LIKE PATTERN";
   return "NO DISC PATTERN";
