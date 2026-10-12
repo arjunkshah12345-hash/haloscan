@@ -37,7 +37,8 @@ Checked items were verified. Unchecked items were not. Updated 2026-10-11 for `r
 - [ ] Student records the video from the deployed app.
 - [ ] Student confirms eligibility, district, and team facts.
 - [ ] Student submits the form themselves. This repository does not submit it.
-- [ ] Production Render API commit matches the tested version (**blocked**: live API still 2.2.0; needs `render login` + deploy).
+- [x] Production Render API previously verified at 2.4.0; this branch bumps API to **2.5.0** (metrics never recompute online; dual-view collapse guard). Redeploy Render after merge.
+- [x] Dual-view coin collapse reproduced and documented; ensemble guard + `cnn_only` ablation retained.
 
 ## Not claimed
 

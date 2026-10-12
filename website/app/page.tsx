@@ -38,15 +38,15 @@ export default function HomePage() {
               HaloScan
             </h1>
             <p className="hero-sub" data-reveal>
-              Measure the halo on drawn X-rays. Classical radial profiling and a dual-view network — labeled
-              synthetic, not a diagnosis.
+              A research instrument for button-battery-like vs coin-like patterns on synthetic X-rays.
+              Classical radial profiling plus a dual-view network — labeled synthetic, not a diagnosis.
             </p>
             <div className="hero-actions" data-reveal>
               <Link href="/scan" className="btn btn--on-band">
-                Open scanner <span className="arr" aria-hidden>→</span>
+                Explore the Demo <span className="arr" aria-hidden>→</span>
               </Link>
-              <Link href="/scan?judge=1" className="btn btn--ghost-band">
-                90-second judge demo
+              <Link href="/judges" className="btn btn--ghost-band">
+                Judge guide
               </Link>
             </div>
 

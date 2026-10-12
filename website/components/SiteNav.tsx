@@ -33,7 +33,7 @@ export function SiteNav({ current }: { current?: NavKey }) {
         </li>
         <li>
           <Link href="/scan" className="btn btn--accent btn--sm site-nav__cta" aria-current={current === "scan" ? "page" : undefined}>
-            Open scanner
+            Explore the Demo
           </Link>
         </li>
       </ul>

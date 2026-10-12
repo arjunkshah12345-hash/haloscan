@@ -58,10 +58,46 @@ type Metrics = {
 };
 
 const CASES = [
-  { id: "battery", title: "Button battery", sub: "Synthetic · AP + lateral", key: "1", fig: "/figures/battery/ap.png" },
-  { id: "coin", title: "Single coin", sub: "Synthetic · AP only", key: "2", fig: "/figures/coin/ap.png" },
-  { id: "stacked", title: "Stacked coins", sub: "Synthetic mimic", key: "3", fig: "/figures/stacked/ap.png" },
-  { id: "normal", title: "No disc", sub: "Synthetic background", key: "4", fig: "/figures/normal/ap.png" },
+  {
+    id: "battery",
+    letter: "A",
+    title: "Battery-like",
+    sub: "Synthetic double halo · AP + lateral",
+    truth: "Ground truth: synthetic button battery",
+    why: "Concentric rings on the frontal image. The research flag should fire.",
+    key: "1",
+    fig: "/figures/battery/ap.png",
+  },
+  {
+    id: "coin",
+    letter: "B",
+    title: "Single coin",
+    sub: "Synthetic flat disc · AP + lateral (shows collapse guard)",
+    truth: "Ground truth: synthetic single coin",
+    why: "Homogeneous disc. DualViewNet alone still collapses this class with a lateral; the ensemble guard recovers coin-like when AP-only CNN and classical agree.",
+    key: "2",
+    fig: "/figures/coin/ap.png",
+  },
+  {
+    id: "stacked",
+    letter: "C",
+    title: "Stacked coins",
+    sub: "Synthetic multi-ring mimic · AP",
+    truth: "Ground truth: synthetic stacked coins",
+    why: "Copied rings can look like a battery halo. Ambiguity is the honest research signal.",
+    key: "3",
+    fig: "/figures/stacked/ap.png",
+  },
+  {
+    id: "normal",
+    letter: "D",
+    title: "No disc",
+    sub: "Synthetic background",
+    truth: "Ground truth: no foreign body drawn",
+    why: "Control background. Not a negative clinical study.",
+    key: "4",
+    fig: "/figures/normal/ap.png",
+  },
 ];
 
 const PIPELINE_STEPS = [
@@ -119,6 +155,7 @@ export function ScanApp() {
   const [judgeBanner, setJudgeBanner] = useState(judgeMode);
   const [showHelp, setShowHelp] = useState(false);
   const [nudgeCase3, setNudgeCase3] = useState(false);
+  const [apiDetail, setApiDetail] = useState<string | null>(null);
   const lastDemo = useRef<string | null>(null);
   const resultsRef = useRef<HTMLElement>(null);
   const judgeStarted = useRef(false);
@@ -154,20 +191,39 @@ export function ScanApp() {
       try {
         const h = await fetch("/api/health");
         const hd = h.ok ? await h.json() : null;
-        setApiLive(!!hd?.model);
-        if (hd?.model) {
+        const live = hd?.model === "loaded" || hd?.model === true;
+        setApiLive(!!live);
+        setApiDetail(
+          live
+            ? null
+            : hd?.detail ||
+              "Inference API is offline or waking up. Reference cases may fall back to labeled prerecorded demos. Uploads need a live API.",
+        );
+        if (live) {
           await fetch("/api/demo/battery").catch(() => null);
         }
         const m = await fetch("/api/metrics").catch(() => null);
         if (m?.ok) setMetrics(await m.json());
       } catch {
         setApiLive(false);
+        setApiDetail("Could not reach the inference API. Uploads will fail until it responds.");
       } finally {
         setApiWarming(false);
       }
     };
     warm();
   }, []);
+
+  const resetBench = () => {
+    setApFile(null);
+    setLatFile(null);
+    setApPreview(null);
+    setLatPreview(null);
+    setResult(null);
+    setActiveCase(null);
+    lastDemo.current = null;
+    setNudgeCase3(false);
+  };
 
   const onFile = (file: File, kind: "ap" | "lat") => {
     if (!file.type.startsWith("image/")) {
@@ -195,6 +251,8 @@ export function ScanApp() {
       setLoading(true);
       setActiveCase(id);
       lastDemo.current = id;
+      setApFile(null);
+      setLatFile(null);
       try {
         const [res, prev] = await Promise.all([
           fetch(`/api/demo/${id}`),
@@ -202,7 +260,11 @@ export function ScanApp() {
         ]);
         if (!res.ok) {
           const err = await res.text();
-          throw new Error(err.includes("timeout") ? "API waking up — try again in 30s" : err.slice(0, 120));
+          throw new Error(
+            err.includes("timeout") || res.status === 503
+              ? "Inference API unavailable. No result was invented. Try again when the API is awake."
+              : err.slice(0, 160),
+          );
         }
         const data = (await res.json()) as Result;
         setResult(data);
@@ -210,16 +272,22 @@ export function ScanApp() {
           const p = await prev.json();
           if (p.ap_b64) setApPreview(p.ap_b64);
           setLatPreview(p.lateral_b64 ?? null);
+        } else {
+          const fig = CASES.find((c) => c.id === id)?.fig;
+          if (fig) setApPreview(fig);
+          setLatPreview(null);
         }
         scrollToResults();
+        const letter = CASES.find((c) => c.id === id)?.letter || "?";
         notify(
           data.inference_source === "live"
-            ? `Case ${CASES.find((c) => c.id === id)?.key} — live inference on a synthetic sample`
-            : `Case ${CASES.find((c) => c.id === id)?.key} — prerecorded synthetic demo, API did not run a new pass`,
+            ? `Case ${letter} — live inference on a synthetic sample`
+            : `Case ${letter} — labeled prerecorded demo (API did not run a new forward pass)`,
         );
         if (id === "battery") setNudgeCase3(true);
         else if (id === "stacked") setNudgeCase3(false);
       } catch (e) {
+        setResult(null);
         notify(e instanceof Error ? e.message : "Demo failed");
       } finally {
         setLoading(false);
@@ -230,10 +298,11 @@ export function ScanApp() {
 
   const runJudgeDemo = useCallback(async () => {
     setJudgeBanner(true);
-    notify("Judge demo: Case 1 (battery) → then Case 3 (stacked coins)");
+    notify("Judge walkthrough: Case A (battery) → Case B (coin) → Case C (stacked)");
     await runDemo("battery");
-    await new Promise((r) => setTimeout(r, 2500));
-    notify("Now running Case 3 — the false-halo trap");
+    await new Promise((r) => setTimeout(r, 1800));
+    await runDemo("coin");
+    await new Promise((r) => setTimeout(r, 1800));
     await runDemo("stacked");
   }, [notify, runDemo]);
 
@@ -255,12 +324,30 @@ export function ScanApp() {
     if (latFile) form.append("lateral", latFile);
     try {
       const res = await fetch("/api/analyze", { method: "POST", body: form });
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) {
+        const raw = await res.text();
+        let detail = `Analysis failed (HTTP ${res.status}).`;
+        try {
+          const body = JSON.parse(raw) as { error?: string; detail?: string };
+          detail = body.error || body.detail || detail;
+        } catch {
+          detail = raw.slice(0, 180) || detail;
+        }
+        throw new Error(
+          res.status === 503
+            ? "Inference API unavailable. Uploaded images are not analyzed with a prerecorded substitute."
+            : detail,
+        );
+      }
       const data = (await res.json()) as Result;
-      setResult({ ...data, inference_source: data.inference_source || "live" });
+      if (data.inference_source && data.inference_source !== "live") {
+        throw new Error("Unexpected non-live analyze response. Refusing to show a substituted result.");
+      }
+      setResult({ ...data, inference_source: "live" });
       scrollToResults();
       notify("Analysis complete — live inference on the uploaded image");
     } catch (e) {
+      setResult(null);
       notify(e instanceof Error ? e.message : "Analysis failed");
     } finally {
       setLoading(false);
@@ -353,43 +440,84 @@ export function ScanApp() {
         <a href="tel:18002221222">1-800-222-1222</a>.
       </p>
 
+      {apiDetail && (
+        <p className="scan-api-banner" role="status">
+          {apiDetail}
+        </p>
+      )}
+
+      <section className="demo-intro">
+        <div className="demo-intro__copy">
+          <p className="eyebrow">Interactive demonstration</p>
+          <h1>Pick a reference case</h1>
+          <p>
+            Three synthetic films for judges. Click a card — no keyboard required. Optional shortcuts:{" "}
+            <kbd>1</kbd>–<kbd>4</kbd>.
+          </p>
+        </div>
+        <div className="demo-intro__actions">
+          <button type="button" className="btn btn--accent" onClick={runJudgeDemo} disabled={loading || apiWarming}>
+            Run A → B → C walkthrough
+          </button>
+          <button type="button" className="btn btn--ghost" onClick={resetBench} disabled={loading}>
+            Reset bench
+          </button>
+        </div>
+      </section>
+
       {judgeBanner && (
         <p className="scan-judge">
-          Judge path: press <kbd>1</kbd> then <kbd>3</kbd>.{" "}
-          <button type="button" className="link-btn" onClick={runJudgeDemo} disabled={loading || apiWarming}>
-            Run both automatically
-          </button>
+          Judge walkthrough armed. Watch the source badge on each result: <strong>Live</strong> vs{" "}
+          <strong>Prerecorded</strong>.
         </p>
       )}
 
       <div className="case-rail" role="list">
-        {CASES.map((c) => (
+        {CASES.filter((c) => c.id !== "normal").map((c) => (
           <button
             key={c.id}
             type="button"
             role="listitem"
             className={`case-tile ${activeCase === c.id ? "active" : ""}`}
             onClick={() => runDemo(c.id)}
+            disabled={loading}
           >
+            <span className="case-tile__letter" aria-hidden>
+              {c.letter}
+            </span>
             <span className="case-tile__thumb">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={c.fig} alt="" />
             </span>
             <span className="case-tile__copy">
-              <strong>
-                <kbd>{c.key}</kbd> {c.title}
-              </strong>
+              <strong>{c.title}</strong>
               <span>{c.sub}</span>
+              <span className="case-tile__truth">{c.truth}</span>
             </span>
           </button>
         ))}
+        <button
+          type="button"
+          role="listitem"
+          className={`case-tile case-tile--quiet ${activeCase === "normal" ? "active" : ""}`}
+          onClick={() => runDemo("normal")}
+          disabled={loading}
+        >
+          <span className="case-tile__letter" aria-hidden>
+            D
+          </span>
+          <span className="case-tile__copy">
+            <strong>No disc</strong>
+            <span>Optional control background</span>
+          </span>
+        </button>
       </div>
 
       <div className="scan-bench">
         <section className="bench-panel">
-          <h2>Upload</h2>
+          <h2>Upload your own</h2>
           <p className="bench-lead">
-            AP required. Lateral optional — fused when present, not assumed to help.
+            AP required. Lateral optional — fused when present, not assumed to help. Needs a live API; no silent demo substitute.
           </p>
 
           <label
@@ -447,29 +575,35 @@ export function ScanApp() {
           ) : !r ? (
             <div className="results-empty">
               <p className="results-empty-lead">No analysis yet</p>
-              <p>
-                Pick a reference case or press <kbd>1</kbd>.
-              </p>
-              <p>
-                Judges: <kbd>1</kbd> battery, <kbd>3</kbd> stacked coins. Source badges say live or prerecorded.
-              </p>
+              <p>Click Case A, B, or C above. Judges can also run the A → B → C walkthrough.</p>
               <button type="button" className="btn-judge-inline" onClick={runJudgeDemo} disabled={loading || apiWarming}>
-                Run 90-second judge demo
+                Run A → B → C walkthrough
               </button>
             </div>
           ) : (
             <>
               <div className="verdict-badges">
+                <span className={`badge ${r.inference_source === "live" ? "badge-live" : "badge-prerecorded"}`}>
+                  {r.inference_source === "live" ? "Live inference" : "Prerecorded demo"}
+                </span>
                 {r.emergency && <span className="badge badge-critical">Research flag</span>}
                 {r.ambiguous && <span className="badge badge-ambiguous">Ambiguous pattern</span>}
-                {r.dual_view_used && <span className="badge badge-dual">Dual-view used</span>}
-                <span className={`badge ${r.inference_source === "live" ? "badge-live" : "badge-ambiguous"}`}>{sourceLabel(r)}</span>
+                {r.dual_view_used && <span className="badge badge-dual">Dual-view path used</span>}
+                <span className="badge">{sourceLabel(r)}</span>
               </div>
+
+              {activeCase && (
+                <p className="ground-truth">
+                  {CASES.find((c) => c.id === activeCase)?.truth}.{" "}
+                  <span className="dim">{CASES.find((c) => c.id === activeCase)?.why}</span>
+                </p>
+              )}
 
               <div className={`verdict ${verdictClass}`}>
                 <div className="verdict-title">{researchLabel(r)}</div>
                 <div className="verdict-meta">
-                  Uncalibrated score {(r.confidence * 100).toFixed(1)}% · uncertainty {r.protocol.uncertainty || "unspecified"}
+                  Uncalibrated model score {(r.confidence * 100).toFixed(1)} (not a diagnostic probability) · uncertainty{" "}
+                  {r.protocol.uncertainty || "unspecified"}
                 </div>
               </div>
 
@@ -485,10 +619,10 @@ export function ScanApp() {
               {nudgeCase3 && activeCase === "battery" && (
                 <div className="nudge-case3">
                   <p>
-                    <strong>Judge checkpoint:</strong> Case 3 is synthetic stacked coins. Compare the ambiguity flag with Case 1.
+                    <strong>Next:</strong> Case B (coin) then Case C (stacked coins). Compare live vs prerecorded badges and the ambiguity flag.
                   </p>
-                  <button type="button" className="btn-judge-run" onClick={() => runDemo("stacked")} disabled={loading}>
-                    Run Case 3 (stacked coins) →
+                  <button type="button" className="btn-judge-run" onClick={() => runDemo("coin")} disabled={loading}>
+                    Run Case B (coin) →
                   </button>
                 </div>
               )}

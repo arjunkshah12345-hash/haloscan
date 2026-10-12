@@ -46,6 +46,8 @@ Radiologists look for a **double halo** on AP films — bright outer rim, darker
 
 Synthetic only. See `docs/eval/eval_report.json` after `python3 -m haloscan.eval_suite --n 40`, and the [evaluation page](https://haloscan-cac.vercel.app/validation). Do not read a point estimate on 40 drawn images as clinical sensitivity, and do not compare it with the Emory 2020 radiograph study.
 
+**Dual-view finding (documented, not hidden):** DualViewNet alone still calls every synthetic coin battery-like when an independently drawn lateral is attached (`cnn_only` coin-pattern rate **0/40**). Classical AP profiling and AP-only CNN separate coins. The default **ensemble** applies a dual-view collapse guard so fusion does not follow DualViewNet when AP-only CNN and classical agree on coin (ensemble coin-pattern rate **40/40** on the 2026-10-12 holdout). Stacked-coin research flags remain **35/40**.
+
 ---
 
 ## Quick start

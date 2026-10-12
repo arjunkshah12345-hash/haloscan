@@ -29,7 +29,6 @@ ALLOWED_TYPES = {
 }
 _HITS: dict[str, deque] = defaultdict(deque)
 
-from haloscan.evaluate import evaluate_on_synthetic
 from haloscan.inference import get_engine
 from haloscan.report import generate_html_report
 from haloscan.synthetic import generate_sample
@@ -38,10 +37,12 @@ from haloscan.visualize import numpy_to_b64
 ROOT = Path(__file__).resolve().parent.parent
 STATIC = ROOT / "static"
 METRICS_FILE = ROOT / "weights" / "metrics.json"
+EVAL_REPORT_FILE = ROOT / "docs" / "eval" / "eval_report.json"
 
 _metrics_cache: dict | None = None
 _metrics_cache_time: float = 0
 METRICS_TTL = 3600
+API_VERSION = "2.5.0"
 
 
 @asynccontextmanager
@@ -52,7 +53,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Haloscan API",
-    version="2.4.0",
+    version=API_VERSION,
     description="Experimental research prototype. Not a medical device.",
     lifespan=lifespan,
 )
@@ -140,9 +141,11 @@ def _safe_analyze(ap_img, lat_img):
 
 
 def _demo_spec(case: str) -> tuple[int, bool]:
+    # Coin demos include a synthetic lateral so judges can see the dual-view
+    # collapse guard (DualViewNet alone still fails; ensemble recovers).
     mapping = {
         "battery": (0, True),
-        "coin": (1, False),
+        "coin": (1, True),
         "stacked": (2, False),
         "normal": (3, False),
     }
@@ -161,15 +164,24 @@ def _run_demo(case: str):
     ap = generate_sample(label, seed=42)
     ap_rgb = cv2.cvtColor((ap * 255).astype(np.uint8), cv2.COLOR_GRAY2RGB)
     lat_rgb = None
-    if with_lat and label == 0:
-        lat = generate_sample(0, lateral=True, seed=43)
+    if with_lat and label in (0, 1):
+        lat = generate_sample(label, lateral=True, seed=43)
         lat_rgb = cv2.cvtColor((lat * 255).astype(np.uint8), cv2.COLOR_GRAY2RGB)
     return get_engine().analyze(ap_rgb, lat_rgb)
 
 
 def _bundled_metrics() -> dict | None:
+    """Prefer the versioned eval report. Never recompute on the request path."""
+    if EVAL_REPORT_FILE.exists():
+        report = json.loads(EVAL_REPORT_FILE.read_text())
+        report["metrics_source"] = "published_synthetic_eval_report"
+        report["clinical_accuracy"] = False
+        return report
     if METRICS_FILE.exists():
-        return json.loads(METRICS_FILE.read_text())
+        legacy = json.loads(METRICS_FILE.read_text())
+        legacy["metrics_source"] = "legacy_synthetic_point_estimates"
+        legacy["clinical_accuracy"] = False
+        return legacy
     return None
 
 
@@ -295,31 +307,45 @@ async def cases():
 
 @app.get("/api/metrics")
 async def metrics(refresh: bool = False):
+    """Serve the published synthetic report only.
+
+    Running evaluate_on_synthetic on a web request previously exhausted the
+    free Render worker and returned HTTP 503. Recompute offline with:
+
+        python3 -m haloscan.eval_suite --n 40
+    """
     global _metrics_cache, _metrics_cache_time
     now = time.time()
     if not refresh and _metrics_cache and (now - _metrics_cache_time) < METRICS_TTL:
         return _metrics_cache
-    if not refresh:
-        bundled = _bundled_metrics()
-        if bundled:
-            _metrics_cache = bundled
-            _metrics_cache_time = now
-            return bundled
-    _metrics_cache = evaluate_on_synthetic(n=40)
-    _metrics_cache_time = now
-    return _metrics_cache
+    bundled = _bundled_metrics()
+    if bundled:
+        _metrics_cache = bundled
+        _metrics_cache_time = now
+        return bundled
+    raise HTTPException(
+        503,
+        "Published metrics are not bundled on this host. "
+        "Run `python3 -m haloscan.eval_suite --n 40` offline; live recomputation is disabled.",
+    )
 
 
 @app.get("/api/health")
 async def health():
     bundled = _bundled_metrics()
+    engine_ok = False
+    try:
+        engine_ok = get_engine() is not None
+    except Exception:
+        engine_ok = False
     return {
-        "status": "ok",
-        "version": "2.4.0",
-        "model": "loaded",
+        "status": "ok" if engine_ok else "degraded",
+        "version": API_VERSION,
+        "model": "loaded" if engine_ok else "failed",
         "positioning": "experimental_research_prototype",
         "weights": "bundled" if (ROOT / "weights" / "haloscan.pt").exists() else "custom",
         "metrics": bundled is not None,
+        "metrics_path": "docs/eval/eval_report.json" if EVAL_REPORT_FILE.exists() else "weights/metrics.json",
     }
 
 
