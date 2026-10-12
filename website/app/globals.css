@@ -17,7 +17,9 @@
   VOICE       : "Measure the halo." / "Synthetic scores, labeled." / "Open the bench."
 */
 
-@import url("/studio/tokens.css");
+/* Relative import so Next bundles tokens before other rules.
+   Absolute @import url("/studio/…") is ignored after @font-face in the CSS bundle. */
+@import "./tokens.css";
 
 :root {
   --paper: #080b10;
@@ -137,6 +139,16 @@ a {
   color: var(--ink);
 }
 
+.site-nav__links a.btn {
+  color: var(--accent-ink);
+  font: 500 var(--small) / 1 var(--font-text);
+  text-decoration: none;
+}
+
+.site-nav__links a.btn:hover {
+  color: var(--accent-ink);
+}
+
 .site-nav__cta {
   text-decoration: none;
 }
@@ -218,6 +230,17 @@ a {
   margin-bottom: clamp(2.5rem, 5vw, 4rem);
 }
 
+@media (max-width: 520px) {
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 .btn--on-band {
   background: var(--band-ink);
   color: #10275a;
@@ -235,6 +258,10 @@ a {
 
 .btn--ghost-band:hover {
   box-shadow: inset 0 0 0 1px rgb(238 243 255 / 0.7);
+}
+
+.safety-strip {
+  max-width: 52rem;
 }
 
 .hero-stage {
