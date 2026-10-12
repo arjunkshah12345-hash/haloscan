@@ -1,160 +1,215 @@
 import Link from "next/link";
-import { MinimalFigure } from "@/components/MinimalFigure";
-import { Nav } from "@/components/Nav";
-import { ReadMore } from "@/components/ReadMore";
+import { SiteFooter } from "@/components/SiteFooter";
+import { SiteNav } from "@/components/SiteNav";
+import { HaloMark } from "@/components/HaloMark";
+
+const CASES = [
+  {
+    id: "battery",
+    title: "Button battery",
+    caption: "Drawn double halo. Research flag, not a treatment order.",
+    src: "/figures/battery/ap.png",
+  },
+  {
+    id: "stacked",
+    title: "Stacked coins",
+    caption: "Copied rings can look like a halo. Ambiguity is a research signal.",
+    src: "/figures/stacked/ap.png",
+  },
+  {
+    id: "coin",
+    title: "Single coin",
+    caption: "Flat disc. A coin-like score does not rule out a battery.",
+    src: "/figures/coin/ap.png",
+  },
+];
 
 export default function HomePage() {
   return (
-    <div className="page">
-      <Nav current="home" />
+    <>
+      <SiteNav current="home" />
+      <main id="main">
+        <section className="hero-band" aria-label="HaloScan">
+          <div className="hero-band__inner">
+            <p className="eyebrow hero-kicker" data-reveal>
+              Congressional App Challenge 2026 · research prototype
+            </p>
+            <h1 className="hero-title" data-reveal>
+              HaloScan
+            </h1>
+            <p className="hero-sub" data-reveal>
+              Measure the halo on drawn X-rays. Classical radial profiling and a dual-view network — labeled
+              synthetic, not a diagnosis.
+            </p>
+            <div className="hero-actions" data-reveal>
+              <Link href="/scan" className="btn btn--on-band">
+                Open scanner <span className="arr" aria-hidden>→</span>
+              </Link>
+              <Link href="/scan?judge=1" className="btn btn--ghost-band">
+                90-second judge demo
+              </Link>
+            </div>
 
-      <p className="kicker">Congressional App Challenge 2026 · experimental prototype</p>
-      <h1>HaloScan</h1>
-      <p className="lede">
-        A radial measurement and a small dual-view network, scored on drawn X-rays. Not a diagnosis.
-      </p>
-      <p>
-        Suspected button-battery ingestion needs emergency care regardless of this app. HaloScan does not
-        diagnose, rule out a battery, or recommend discharge. Hotline{" "}
-        <a href="tel:18004988666">1-800-498-8666</a>.
-      </p>
-      <p>
-        <Link href="/scan">Open live scanner</Link>
-        {" · "}
-        <Link href="/scan?judge=1">90-second judge demo</Link>
-        {" · "}
-        <a href="https://github.com/arjunkshah12345-hash/haloscan">GitHub</a>
-      </p>
+            <div className="hero-stage" data-reveal role="img" aria-label="Preview of the HaloScan research scanner">
+              <div className="product-window">
+                <div className="product-window__bar">
+                  <span className="product-window__dots" aria-hidden>
+                    <i /><i /><i />
+                  </span>
+                  <span>haloscan · live bench</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <span className="live-dot" aria-hidden />
+                    API ready
+                  </span>
+                </div>
+                <div className="product-window__body">
+                  <div className="product-film">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/figures/battery/ap.png" alt="" />
+                    <div className="product-film__rings" aria-hidden>
+                      <HaloMark className="halo-mark" style={{ width: 96, height: 96, color: "rgba(232,236,242,0.45)" }} />
+                    </div>
+                  </div>
+                  <div className="product-side">
+                    <p className="t-label product-side__label">Research readout</p>
+                    <p className="product-side__verdict">Battery-like pattern</p>
+                    <p className="t-small dimmer">Uncalibrated · synthetic holdout · not clinical probability</p>
+                    <div className="meter">
+                      <div className="meter__row">
+                        <span>Classical</span>
+                        <div className="meter__track"><div className="meter__fill meter__fill--cv" style={{ width: "78%" }} /></div>
+                        <span className="meter__val">78%</span>
+                      </div>
+                      <div className="meter__row">
+                        <span>Network</span>
+                        <div className="meter__track"><div className="meter__fill" style={{ width: "91%" }} /></div>
+                        <span className="meter__val">91%</span>
+                      </div>
+                      <div className="meter__row">
+                        <span>Fused</span>
+                        <div className="meter__track"><div className="meter__fill" style={{ width: "86%" }} /></div>
+                        <span className="meter__val">86%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      <MinimalFigure
-        caseId="battery"
-        label="Synthetic button battery"
-        caption="A drawn double halo. The scanner shows a battery-like research score, not a treatment order."
-      />
-      <MinimalFigure
-        caseId="stacked"
-        label="Synthetic stacked coins"
-        caption="Copied rings can look like a halo. The ambiguity flag is a research signal, not a discharge decision."
-      />
-      <MinimalFigure
-        caseId="coin"
-        label="Synthetic coin"
-        caption="A flat disc. A coin-like score does not rule out a battery and must not be used to send a child home."
-      />
+        <div className="page-rest">
+          <p className="safety-strip" role="note">
+            Suspected button-battery ingestion needs emergency care regardless of this app. HaloScan does not
+            diagnose, rule out a battery, or recommend discharge. Hotline{" "}
+            <a href="tel:18004988666">1-800-498-8666</a>.
+          </p>
 
-      <ReadMore title="Abstract">
-        <p>
-          When a disc-shaped object is suspected in a child&apos;s esophagus, clinicians distinguish a button battery
-          from a coin on radiographs. Stacked coins can copy the double-halo look. HaloScan is a student research
-          prototype: OpenCV radial profiles plus a small PyTorch dual-view network, trained and scored on a
-          procedural image generator. Those scores are not clinical accuracy. The live scanner shows the image,
-          the detected region, both branches, Grad-CAM, and an uncertainty readout.
-        </p>
-      </ReadMore>
+          <section className="chapter">
+            <div className="chapter__inner">
+              <div className="chapter__head" data-reveal>
+                <p className="eyebrow">Holdout · 11 Oct 2026</p>
+                <h2 className="two-tone">
+                  What the measurement found. <span>Forty synthetic images per class. Not a clinical study.</span>
+                </h2>
+              </div>
+              <table className="holdout-table" data-reveal>
+                <thead>
+                  <tr>
+                    <th>Setup</th>
+                    <th>Battery flag</th>
+                    <th>Coin-like</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Frontal image only</td>
+                    <td>40/40</td>
+                    <td>40/40</td>
+                  </tr>
+                  <tr>
+                    <td>Frontal + separate drawn lateral</td>
+                    <td>40/40</td>
+                    <td>0/40</td>
+                  </tr>
+                  <tr>
+                    <td>Classical CV only</td>
+                    <td>5/40</td>
+                    <td>40/40</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p className="dim" style={{ marginTop: "1.25rem", maxWidth: "40rem" }} data-reveal>
+                The network follows rings. A second synthetic view made it call every coin a battery. The classical
+                branch still separated coins. Wilson 95% for 40/40 starts near 91%.{" "}
+                <Link className="link" href="/validation">
+                  Full report
+                </Link>
+                .
+              </p>
+            </div>
+          </section>
 
-      <ReadMore title="The problem">
-        <p>
-          Reese&apos;s Law (Public Law 117-171, enacted August 16, 2022) tells the Consumer Product Safety
-          Commission to require child-resistant packaging, warning labels, and safer battery compartments. It is
-          a prevention law. It does not validate any diagnostic app. The House passed the bill under suspension
-          of the rules; the Senate passed it by unanimous consent. A recorded 409–2 vote is not what Congress.gov
-          shows for final passage.
-        </p>
-        <p>
-          A button battery lodged in the esophagus can injure tissue within about two hours. That fact is why
-          suspected ingestion is an emergency. It is not a result this model is allowed to manage. Poison Control
-          and the National Battery Ingestion Hotline (1-800-498-8666) give the public guidance. HaloScan does not.
-        </p>
-      </ReadMore>
+          <section className="chapter">
+            <div className="chapter__inner">
+              <div className="chapter__head" data-reveal>
+                <p className="eyebrow">Synthetic cases</p>
+                <h2 className="two-tone">
+                  Three films on the bench. <span>All drawn. All labeled.</span>
+                </h2>
+              </div>
+              <div className="case-grid" data-reveal-group>
+                {CASES.map((c) => (
+                  <Link key={c.id} href={`/scan?case=${c.id}`} className="case-card" data-reveal>
+                    <div className="case-card__media">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={c.src} alt="" />
+                    </div>
+                    <div className="case-card__cap">
+                      <p className="t-label">{c.title}</p>
+                      <p className="t-small dim">{c.caption}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
 
-      <h2>What the holdout actually did</h2>
-      <p className="muted">
-        Forty synthetic images per class, 11 October 2026. Same generator family as training. Not a clinical
-        study, and not a comparison with the Emory 2020 radiograph paper.
-      </p>
-      <table className="data">
-        <thead>
-          <tr>
-            <th>Setup</th>
-            <th>Battery flag</th>
-            <th>Coin-like</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Frontal image only</td>
-            <td>40/40</td>
-            <td>40/40</td>
-          </tr>
-          <tr>
-            <td>Frontal plus a separate drawn lateral</td>
-            <td>40/40</td>
-            <td>0/40</td>
-          </tr>
-          <tr>
-            <td>Classical CV only</td>
-            <td>5/40</td>
-            <td>40/40</td>
-          </tr>
-        </tbody>
-      </table>
-      <p>
-        The network follows rings. A second synthetic view made it call every coin a battery. The classical
-        branch still separated coins, and barely caught batteries. Wilson 95% for 40/40 starts near 91%.{" "}
-        <Link href="/validation">Full report</Link>.
-      </p>
+          <section className="chapter">
+            <div className="chapter__inner">
+              <div className="chapter__head" data-reveal>
+                <p className="eyebrow">Pipeline</p>
+                <h2 className="two-tone">
+                  Two branches, one readout. <span>OpenCV radial profile · DualViewNet · ensemble.</span>
+                </h2>
+                <p className="dim" style={{ marginTop: "1rem" }}>
+                  Fusion weights live in <code style={{ fontFamily: "var(--font-mono)", fontSize: "0.85em" }}>inference.py</code>.
+                  Grad-CAM and the radial chart ship with every live pass. No care plan is returned.{" "}
+                  <Link className="link" href="/architecture">
+                    Model explorer
+                  </Link>
+                  .
+                </p>
+              </div>
+            </div>
+          </section>
 
-      <ReadMore title="How it works">
-        <p>
-          Two branches: OpenCV radial halo profiling, and DualViewNet on an AP image plus an optional lateral.
-          The fusion weights are in inference.py (0.48 classical, 0.42 CNN, plus a small lateral step-off bump).
-          Every scan returns uncalibrated scores, Grad-CAM, a radial chart, and a research readout. It does not
-          return a care plan.
-        </p>
-        <p>
-          <Link href="/architecture">Architecture</Link>
-          {" · "}
-          <Link href="/methodology">Methodology</Link>
-          {" · "}
-          <Link href="/validation">Validation</Link>
-        </p>
-      </ReadMore>
-
-      <ReadMore title="More">
-        <ul className="plain-list">
-          <li>
-            <Link href="/gallery">Figure gallery</Link>
-          </li>
-          <li>
-            <Link href="/use-cases">Synthetic examples</Link>
-          </li>
-          <li>
-            <Link href="/judges">Judge verification guide</Link>
-          </li>
-          <li>
-            <a href="https://www.congress.gov/bill/117th-congress/house-bill/5313">Reese&apos;s Law — Congress.gov</a>
-          </li>
-        </ul>
-      </ReadMore>
-
-      <ReadMore title="References">
-        <ul className="plain-list">
-          <li>
-            Rostad CA et al. Machine learning for radiographic diagnosis of button batteries and coins in children.
-            <em> Pediatric Radiology</em>, 2020.
-          </li>
-          <li>Reese&apos;s Law, P.L. 117-171 (15 U.S.C. § 2056e).</li>
-          <li>Litovitz T, Whitaker N, Clark L. Preventing battery ingestions: an analysis of 8648 cases. <em>Pediatrics</em>, 2010.</li>
-        </ul>
-        <p className="muted">
-          Full technical documentation:{" "}
-          <a href="https://github.com/arjunkshah12345-hash/haloscan/blob/main/TECHNICAL.md">TECHNICAL.md</a>
-        </p>
-      </ReadMore>
-
-      <footer>
-        <p>Experimental prototype. Not a medical device. No patient images are stored.</p>
-      </footer>
-    </div>
+          <section className="finale">
+            <div className="finale__inner" data-reveal>
+              <h2>Open the bench.</h2>
+              <div className="hero-actions">
+                <Link href="/scan" className="btn btn--accent">
+                  Run the scanner <span className="arr" aria-hidden>→</span>
+                </Link>
+                <Link href="/judges" className="btn btn--ghost">
+                  Judge guide
+                </Link>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+      <SiteFooter />
+    </>
   );
 }

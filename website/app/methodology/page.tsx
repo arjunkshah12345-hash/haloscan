@@ -2,8 +2,8 @@ import fs from "fs";
 import path from "path";
 import Link from "next/link";
 import Image from "next/image";
-import { Nav } from "@/components/Nav";
 import { ReadMore } from "@/components/ReadMore";
+import { DocShell } from "@/components/DocShell";
 
 type MethodologyReport = {
   classes: { label: string; note: string }[];
@@ -19,8 +19,7 @@ export default function MethodologyPage() {
   const report = loadReport();
 
   return (
-    <div className="page">
-      <Nav />
+    <DocShell>
 
       <h1>Methodology</h1>
       <p className="lede">
@@ -102,12 +101,6 @@ python3 -m haloscan.evaluate --n 40`}</pre>
       <p>
         <Link href="/validation">Validation results</Link>
       </p>
-
-      <footer>
-        <p>
-          <Link href="/">← Home</Link>
-        </p>
-      </footer>
-    </div>
+    </DocShell>
   );
 }

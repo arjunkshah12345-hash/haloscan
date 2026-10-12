@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { HaloMark } from "./HaloMark";
 
 type Halo = {
   halo_score: number;
@@ -330,59 +331,65 @@ export function ScanApp() {
 
   return (
     <div className="scan-root">
-      <header className="scan-header">
-        <div className="scan-brand">
-          <h1>HaloScan scanner</h1>
-          <p className="scan-tagline">Experimental research prototype · synthetic examples are labeled · keys 1–4</p>
-        </div>
-        <div className="scan-nav">
-          <span className={`status-pill ${apiLive ? "live" : apiWarming ? "warm" : ""}`}>
-            {apiWarming ? "Checking API…" : apiLive === null ? "…" : apiLive ? "Live API" : "API offline · demos are prerecorded"}
+      <header className="scan-top">
+        <Link href="/" className="scan-top__brand">
+          <HaloMark />
+          HaloScan
+        </Link>
+        <div className="scan-top__meta">
+          <span className="status-chip">
+            <span className={`live-dot${apiLive ? "" : " live-dot--off"}`} aria-hidden />
+            {apiWarming ? "Checking API" : apiLive === null ? "…" : apiLive ? "Live API" : "API offline"}
           </span>
-          <Link href="/">Home</Link>
           <Link href="/judges">Judges</Link>
           <button type="button" className="link-btn" onClick={() => setShowHelp(true)} aria-label="Keyboard shortcuts">
-            ?
+            Shortcuts
           </button>
         </div>
       </header>
 
-      <p className="safety-banner" role="note">
-        {SAFETY} National Battery Ingestion Hotline <a href="tel:18004988666">1-800-498-8666</a>. Poison Help{" "}
+      <p className="scan-safety" role="note">
+        {SAFETY} Hotline <a href="tel:18004988666">1-800-498-8666</a>. Poison Help{" "}
         <a href="tel:18002221222">1-800-222-1222</a>.
       </p>
 
       {judgeBanner && (
-        <p className="scan-judge-hint">
-          Judge demo: press <kbd>1</kbd> then <kbd>3</kbd>.{" "}
+        <p className="scan-judge">
+          Judge path: press <kbd>1</kbd> then <kbd>3</kbd>.{" "}
           <button type="button" className="link-btn" onClick={runJudgeDemo} disabled={loading || apiWarming}>
             Run both automatically
           </button>
         </p>
       )}
 
-      <div className="example-strip">
-        <p className="example-label">Reference cases</p>
-        <ul className="case-list">
-          {CASES.map((c) => (
-            <li key={c.id}>
-              <button
-                type="button"
-                className={`case-link ${activeCase === c.id ? "active" : ""}`}
-                onClick={() => runDemo(c.id)}
-              >
-                <kbd>{c.key}</kbd> {c.title} — {c.sub}
-              </button>
-            </li>
-          ))}
-        </ul>
+      <div className="case-rail" role="list">
+        {CASES.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            role="listitem"
+            className={`case-tile ${activeCase === c.id ? "active" : ""}`}
+            onClick={() => runDemo(c.id)}
+          >
+            <span className="case-tile__thumb">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={c.fig} alt="" />
+            </span>
+            <span className="case-tile__copy">
+              <strong>
+                <kbd>{c.key}</kbd> {c.title}
+              </strong>
+              <span>{c.sub}</span>
+            </span>
+          </button>
+        ))}
       </div>
 
-      <div className="scan-layout">
-        <section className="scan-panel">
-          <h2>Upload radiographs</h2>
-          <p className="scan-lead">
-            AP view required. Lateral optional — improves stacked-coin discrimination via DualViewNet.
+      <div className="scan-bench">
+        <section className="bench-panel">
+          <h2>Upload</h2>
+          <p className="bench-lead">
+            AP required. Lateral optional — fused when present, not assumed to help.
           </p>
 
           <label
@@ -396,11 +403,12 @@ export function ScanApp() {
             <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0], "ap")} />
             {!apPreview ? (
               <>
-                <strong>AP (frontal) radiograph</strong>
-                <span className="dropzone-hint">Click or drag to upload</span>
+                <strong>AP (frontal)</strong>
+                <span className="dropzone-hint">Click or drag · PNG / JPEG / WebP</span>
               </>
             ) : (
-              <img src={apPreview} alt="AP" />
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={apPreview} alt="AP preview" />
             )}
           </label>
 
@@ -415,28 +423,35 @@ export function ScanApp() {
             <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0], "lat")} />
             {!latPreview ? (
               <>
-                <strong>Lateral radiograph</strong>
-                <span className="dropzone-hint">Optional. A second view is fused, not assumed to help.</span>
+                <strong>Lateral (optional)</strong>
+                <span className="dropzone-hint">A second view is fused, not assumed to help</span>
               </>
             ) : (
-              <img src={latPreview} alt="Lateral" />
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={latPreview} alt="Lateral preview" />
             )}
           </label>
 
           <button className="btn-analyze" disabled={!apFile || loading} onClick={analyze}>
-            Run full ensemble analysis
+            Run ensemble
           </button>
         </section>
 
-        <section className="scan-panel scan-results" ref={resultsRef}>
-          <h2>Analysis output</h2>
-          {!r ? (
+        <section className="bench-panel" ref={resultsRef}>
+          <h2>Readout</h2>
+          {loading ? (
+            <div className="scan-loading">
+              <HaloMark className="halo-mark ring-loader" />
+              <p>{PIPELINE_STEPS[loadStep] || "Working…"}</p>
+            </div>
+          ) : !r ? (
             <div className="results-empty">
               <p className="results-empty-lead">No analysis yet</p>
-              <p>Click a reference case above or press <kbd>1</kbd> to start.</p>
-              <p className="results-empty-hook">
-                <strong>For judges:</strong> Case <kbd>1</kbd> is a synthetic battery. Case <kbd>3</kbd> is synthetic
-                stacked coins. Both run the real model when the API is up, and say so when they do not.
+              <p>
+                Pick a reference case or press <kbd>1</kbd>.
+              </p>
+              <p>
+                Judges: <kbd>1</kbd> battery, <kbd>3</kbd> stacked coins. Source badges say live or prerecorded.
               </p>
               <button type="button" className="btn-judge-inline" onClick={runJudgeDemo} disabled={loading || apiWarming}>
                 Run 90-second judge demo
@@ -587,13 +602,13 @@ export function ScanApp() {
                 </div>
               </details>
 
-              <div className="actions">
-                <button type="button" className="btn-sec" onClick={downloadReport}>
-                  Download HTML report
+              <div className="hero-actions" style={{ marginTop: "1rem" }}>
+                <button type="button" className="btn btn--ghost btn--sm" onClick={downloadReport}>
+                  Download report
                 </button>
                 <button
                   type="button"
-                  className="btn-sec"
+                  className="btn btn--ghost btn--sm"
                   onClick={() => {
                     navigator.clipboard.writeText(
                       `HaloScan research readout: ${researchLabel(r)}\nUncalibrated battery-like score ${(r.battery_probability * 100).toFixed(0)}%\nSource: ${r.inference_source || "unlabeled"}\n${SAFETY}`,
@@ -604,71 +619,40 @@ export function ScanApp() {
                   Copy summary
                 </button>
               </div>
+
+              <details className="scan-details">
+                <summary>About these numbers</summary>
+                <p className="explanation">
+                  Synthetic point estimates
+                  {batSens != null ? ` (battery-flag ${(batSens * 100).toFixed(0)}%)` : ""} are not clinical
+                  sensitivity and are not a comparison with Emory 2020
+                  {emory != null ? ` (${(emory * 100).toFixed(0)}% on a different dataset)` : ""}. Not a medical
+                  device. Not FDA cleared.
+                </p>
+              </details>
             </>
           )}
         </section>
-
-        <aside className="scan-aside">
-          <details className="read-more read-more-nested">
-            <summary>About this tool</summary>
-            <div className="read-more-body">
-              <p>
-                Published figures are synthetic. A battery-flag point estimate
-                {batSens != null ? ` of ${(batSens * 100).toFixed(0)}%` : ""} is not clinical sensitivity and is not a
-                comparison with the Emory 2020 radiograph study
-                {emory != null ? ` (published battery sensitivity ${(emory * 100).toFixed(0)}% on a different dataset)` : ""}.
-              </p>
-              <p className="muted">Experimental prototype. Not a medical device. Not FDA cleared.</p>
-            </div>
-          </details>
-        </aside>
       </div>
 
-      {loading && (
-        <div className="loading-overlay">
-          <div className="pipeline-panel">
-            <div className="spinner" />
-            <p className="pipeline-title">{PIPELINE_STEPS[loadStep]}</p>
-            <ul className="pipeline-steps">
-              {PIPELINE_STEPS.map((s, i) => (
-                <li key={s} className={i <= loadStep ? "done" : ""}>
-                  {s}
-                </li>
-              ))}
-            </ul>
-            {apiWarming && <p className="pipeline-note">First request may take ~30s while the cloud API wakes up.</p>}
-          </div>
-        </div>
-      )}
-      {toast && <div className="toast">{toast}</div>}
+      {toast && <div className="scan-toast">{toast}</div>}
 
       {showHelp && (
         <div className="help-overlay" onClick={() => setShowHelp(false)} role="presentation">
-          <div className="help-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Keyboard shortcuts">
-            <h3>Keyboard shortcuts</h3>
-            <table>
-              <tbody>
-                {CASES.map((c) => (
-                  <tr key={c.id}>
-                    <td>
-                      <kbd>{c.key}</kbd>
-                    </td>
-                    <td>{c.title}</td>
-                    <td>{c.sub}</td>
-                  </tr>
-                ))}
-                <tr>
-                  <td>
-                    <kbd>?</kbd>
-                  </td>
-                  <td colSpan={2}>
-                    Toggle this help
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <p className="help-tip">Judge path: press 1 → then 3. Or use &ldquo;Run judge demo&rdquo; above.</p>
-            <button type="button" className="btn-sec" onClick={() => setShowHelp(false)}>
+          <div className="help-card" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Keyboard shortcuts">
+            <h3>Shortcuts</h3>
+            <ul>
+              {CASES.map((c) => (
+                <li key={c.id}>
+                  <kbd>{c.key}</kbd> {c.title} — {c.sub}
+                </li>
+              ))}
+              <li>
+                <kbd>?</kbd> Toggle this help
+              </li>
+            </ul>
+            <p className="explanation">Judge path: 1 then 3, or run the automatic demo.</p>
+            <button type="button" className="btn btn--ghost btn--sm" onClick={() => setShowHelp(false)}>
               Close
             </button>
           </div>

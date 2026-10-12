@@ -2,8 +2,8 @@ import fs from "fs";
 import path from "path";
 import Link from "next/link";
 import Image from "next/image";
-import { Nav } from "@/components/Nav";
 import { ReadMore } from "@/components/ReadMore";
+import { DocShell } from "@/components/DocShell";
 
 type Rate = { count: number; n: number; rate: number | null; wilson95: [number, number] };
 
@@ -74,8 +74,7 @@ export default function ValidationPage() {
   const report = loadReport();
 
   return (
-    <div className="page">
-      <Nav />
+    <DocShell current="validation">
       <h1>Evaluation</h1>
       <p className="lede">
         Synthetic measurements of the shipped checkpoint. These are not clinical accuracy and they are not a
@@ -255,11 +254,6 @@ export default function ValidationPage() {
       <p>
         <Link href="/scan?judge=1">Open the judge demo</Link>
       </p>
-      <footer>
-        <p>
-          <Link href="/">← Home</Link>
-        </p>
-      </footer>
-    </div>
+    </DocShell>
   );
 }
