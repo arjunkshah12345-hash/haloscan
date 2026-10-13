@@ -182,15 +182,41 @@ export default function HomePage() {
                 <h2 className="two-tone">
                   Two branches, one readout. <span>OpenCV radial profile · DualViewNet · ensemble.</span>
                 </h2>
-                <p className="dim" style={{ marginTop: "1rem" }}>
-                  Fusion weights live in <code style={{ fontFamily: "var(--font-mono)", fontSize: "0.85em" }}>inference.py</code>.
-                  Grad-CAM and the radial chart ship with every live pass. No care plan is returned.{" "}
-                  <Link className="link" href="/architecture">
-                    Model explorer
-                  </Link>
-                  .
-                </p>
               </div>
+              <ol className="pipe-flow" data-reveal aria-label="HaloScan inference pipeline">
+                <li>
+                  <span className="pipe-flow__n">01</span>
+                  <strong>Image in</strong>
+                  <span>AP required. Lateral optional — not assumed to help.</span>
+                </li>
+                <li>
+                  <span className="pipe-flow__n">02</span>
+                  <strong>Classical CV</strong>
+                  <span>CLAHE, disc localize, radial halo / stacked-mimic scores.</span>
+                </li>
+                <li>
+                  <span className="pipe-flow__n">03</span>
+                  <strong>Neural net</strong>
+                  <span>AP-only and dual-view DualViewNet softmax scores.</span>
+                </li>
+                <li>
+                  <span className="pipe-flow__n">04</span>
+                  <strong>Fusion + explain</strong>
+                  <span>Ensemble with dual-view collapse guard, Grad-CAM, radial chart.</span>
+                </li>
+              </ol>
+              <p className="dim" style={{ marginTop: "1.25rem" }} data-reveal>
+                DualViewNet alone still collapses synthetic coins when an independent lateral is attached.
+                The ensemble trusts AP-only CNN + classical when they agree on coin. Details in{" "}
+                <Link className="link" href="/architecture">
+                  the model page
+                </Link>{" "}
+                and{" "}
+                <Link className="link" href="/validation">
+                  evaluation
+                </Link>
+                .
+              </p>
             </div>
           </section>
 
@@ -199,7 +225,7 @@ export default function HomePage() {
               <h2>Open the bench.</h2>
               <div className="hero-actions">
                 <Link href="/scan" className="btn btn--accent">
-                  Run the scanner <span className="arr" aria-hidden>→</span>
+                  Explore the Demo <span className="arr" aria-hidden>→</span>
                 </Link>
                 <Link href="/judges" className="btn btn--ghost">
                   Judge guide

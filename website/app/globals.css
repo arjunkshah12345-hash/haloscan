@@ -510,6 +510,56 @@ a {
   color: var(--ink);
 }
 
+.pipe-flow {
+  list-style: none;
+  margin: var(--s-6) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 900px) {
+  .pipe-flow {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .pipe-flow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pipe-flow li {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.05rem;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--ring);
+  min-height: 8.5rem;
+}
+
+.pipe-flow__n {
+  font: 500 var(--label) / 1 var(--font-mono);
+  letter-spacing: var(--label-ls);
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.pipe-flow strong {
+  font: 500 var(--ui) / 1.25 var(--font-display);
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+
+.pipe-flow span:last-child {
+  color: var(--ink-3);
+  font-size: var(--small);
+  line-height: 1.4;
+}
+
 .finale {
   padding: var(--s-9) var(--margin);
   text-align: left;

@@ -1,8 +1,8 @@
 # Haloscan — Production Deployment
 
-**Frontend: LIVE** on `https://haloscan-cac.vercel.app` (commit on Vercel tracks recent scanner/home work).
+**Frontend: LIVE** on https://haloscan-cac.vercel.app (Engineered Dark redesign + Case A–C demo).
 
-**API: PARTIAL** — `https://haloscan.onrender.com/api/health` still reports version **2.2.0** while `api/main.py` is **2.4.0**. The Next.js proxy rewrites research labels until Render is redeployed. Render CLI token on this machine is expired (`render login` required).
+**API:** https://haloscan.onrender.com — repo `api/main.py` is **2.5.0** (metrics serve published eval only; dual-view collapse guard). Confirm `/api/health` reports `2.5.0` after Render finishes rebuilding from `main`.
 
 | Layer | URL | Host |
 |-------|-----|------|
@@ -38,19 +38,28 @@ FastAPI + PyTorch + OpenCV (weights/haloscan.pt)
 ### Redeploy API
 
 ```bash
+render login
 render deploys create srv-da4tc1jm8hqs73anthk0 --wait --confirm
+```
+
+Or push an empty commit to `main` to nudge auto-deploy:
+
+```bash
+git commit --allow-empty -m "chore: trigger Render auto-deploy for API 2.5.0"
+git push origin main
 ```
 
 ---
 
 ## Vercel frontend
 
-Custom domain: **haloscan-cac.vercel.app** (Vercel DNS on ideatr.dev)
+Custom domain: **haloscan-cac.vercel.app**
 
 ```bash
 cd website
 vercel env ls                    # HALOSCAN_API_URL → haloscan.onrender.com
 vercel --prod --yes
+vercel alias set <deployment> haloscan-cac.vercel.app
 ```
 
 ---
@@ -58,9 +67,11 @@ vercel --prod --yes
 ## Verify
 
 ```bash
-curl https://haloscan.onrender.com/api/health
+curl https://haloscan.onrender.com/api/health   # expect version 2.5.0
+curl -o /dev/null -w "%{http_code}\n" https://haloscan.onrender.com/api/metrics
 curl https://haloscan-cac.vercel.app/api/health
-curl https://haloscan-cac.vercel.app/api/demo/battery
+curl https://haloscan-cac.vercel.app/api/demo/coin
+cd website && node scripts/e2e-smoke.mjs https://haloscan-cac.vercel.app
 open https://haloscan-cac.vercel.app/scan
 ```
 
