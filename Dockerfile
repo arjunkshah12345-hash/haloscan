@@ -1,3 +1,4 @@
+# HaloScan API image — bump comment when forcing a Render rebuild (currently 2.5.0)
 FROM python:3.11-slim
 
 WORKDIR /app
