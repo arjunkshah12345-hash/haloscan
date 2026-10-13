@@ -10,9 +10,12 @@ const SAFETY =
   "Suspected button-battery ingestion requires immediate professional emergency evaluation regardless of this prototype's output. HaloScan does not diagnose, rule out a battery, recommend discharge, or replace emergency care.";
 
 function researchLabel(prediction: string, ambiguous: boolean): string {
-  if (ambiguous) return "AMBIGUOUS PATTERN";
+  if (ambiguous) {
+    if (/coin/i.test(prediction) && !/battery/i.test(prediction)) return "AMBIGUOUS — COIN-LEANING";
+    return "AMBIGUOUS — BATTERY-LIKE PATTERN";
+  }
   if (/battery/i.test(prediction)) return "BATTERY-LIKE PATTERN";
-  else if (/coin/i.test(prediction)) return "COIN-LIKE PATTERN";
+  if (/coin/i.test(prediction)) return "COIN-LIKE PATTERN";
   return "NO DISC PATTERN";
 }
 
