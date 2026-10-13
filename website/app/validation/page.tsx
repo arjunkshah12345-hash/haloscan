@@ -80,6 +80,11 @@ export default function ValidationPage() {
         Synthetic measurements of the shipped checkpoint. These are not clinical accuracy and they are not a
         comparison that shows HaloScan beating the Emory 2020 radiograph study.
       </p>
+      <p className="muted">
+        DualViewNet alone still calls every synthetic coin battery-like when an independently drawn lateral is
+        attached (<code>cnn_only</code> coin-pattern rate 0/40). The default ensemble applies a dual-view
+        collapse guard, so AP+lateral ensemble coin-pattern recovers to 40/40 on the 2026-10-12 holdout.
+      </p>
 
       {!report ? (
         <p>

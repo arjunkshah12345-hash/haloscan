@@ -42,7 +42,7 @@ Third-party pieces include PyTorch, OpenCV, FastAPI, Next.js, and the published 
 
 ## Challenges
 
-The images are easy for a model in a way real radiographs are not: batteries are drawn as rings and coins as flat discs. A number that looks perfect on those drawings does not survive contact with a second view. On a fresh 40-per-class synthetic holdout (2026-10-11), AP-only coins were called coin-like (40/40), but the same coins with a separately drawn lateral were all called battery-like (0/40 coin-like). The classical branch still separated coins. The network did not, once the lateral was attached. Stacked-coin flagging on that holdout was 35/40 (87.5%), not the 95% figure in the older metrics file. Battery flags were 40/40, and the Wilson 95% interval still starts near 91%, because forty successes is a small sample.
+The images are easy for a model in a way real radiographs are not: batteries are drawn as rings and coins as flat discs. A number that looks perfect on those drawings does not survive contact with a second view. On the 2026-10-11 holdout, DualViewNet alone called every synthetic coin battery-like when a separately drawn lateral was attached (coin-pattern rate 0/40). Classical AP profiling and AP-only CNN still separated coins. As of 2026-10-12 the ensemble applies a dual-view collapse guard: when DualViewNet predicts battery but AP-only CNN and classical agree on coin, fusion uses the AP-only network scores. The `cnn_only` ablation still reports the raw DualViewNet failure. With the guard, AP+lateral ensemble coin-pattern rate is 40/40 on the refreshed holdout; stacked-coin research flags remain 35/40 (87.5%); battery flags 40/40 (Wilson 95% still starts near 91%).
 
 ## Algorithms and tools
 
