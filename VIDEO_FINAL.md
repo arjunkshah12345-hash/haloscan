@@ -6,44 +6,48 @@ Record the screen from the deployed app after this release is live. If a step sh
 
 On-screen name at the start: the student's real name, then "HaloScan."
 
-## 0:00–0:12 — Open
+CAC asks the video to cover the app, its audience, the technologies, and what it does. The order below leads with the problem and one result, and introduces technical terms only after that.
 
-Voice: "I'm [name]. This is HaloScan, a research prototype I built to study a hard X-ray pattern: a button battery and a coin can look alike, and stacked coins can fake the ring people associate with a battery."
+## 0:00–0:15 — The problem
 
-Picture: the HaloScan home page. No sirens, no fake patient story.
+Voice: "I'm [name]. A swallowed button battery can burn through a child's esophagus in about two hours. On an X-ray it can look almost exactly like a coin, and stacked coins can copy the ring people look for on a battery."
+
+Picture: the HaloScan home page hero. No sirens, no fake patient story.
 
 On-screen text: "Experimental prototype. Not a medical device."
 
-## 0:12–0:28 — The problem, without a clinical claim
+## 0:15–0:30 — What HaloScan is, and who it is for
 
-Voice: "A battery stuck in the esophagus can hurt a child quickly. That is why a suspected ingestion is an emergency, whether or not an app is involved. Reese's Law made packaging and battery compartments safer. It did not build a diagnostic test, and HaloScan is not one."
+Voice: "HaloScan is a research prototype I built to study that look-alike problem on computer-drawn X-rays. It is for people learning how image AI can fail, like students and judges. It is not a diagnostic test. A suspected battery ingestion is an emergency whether or not an app is involved."
 
-Picture: stay on the home page safety paragraph. Cut to the hotline line if it is visible: 1-800-498-8666.
+Picture: the safety line with the hotline, 1-800-498-8666.
 
-## 0:28–1:05 — Show the scanner
+## 0:30–1:00 — The one result: a failure, and the guard that fixes it
 
-Voice: "The scanner runs a real model. Case 1 is a synthetic battery, drawn as rings, plus a synthetic lateral. The badge says whether this pass is live or a saved demo."
+Voice: "Here is the most important thing I learned. On October 11, when I added a second, side-view image, the neural network called every synthetic coin a battery, zero out of forty. The drawn side views weren't real projections of the same object, and the network had learned to follow rings. So the app now has a guard: if the two-view network says battery but the front-only network and the classical image analysis both say coin, the app trusts the front-only network. On October 12, with the guard on, forty out of forty coins came back coin-like."
 
-Action: open `/scan?judge=1`. Wait until the first result appears. Point at the source badge, the radial chart, Grad-CAM, and the two scores labeled CV and CNN.
+Picture: the home page "main result" section: the 11 Oct → 12 Oct steps and the small table.
 
-Voice: "The classical branch measures the radial profile. The network is a small dual-view convolutional net. The page shows both numbers. The score is not a probability a doctor should use."
+## 1:00–1:40 — Show the scanner live
 
-## 1:05–1:28 — The coin and the stack
+Voice: "Now the live app. Case A is a synthetic battery. This badge says whether the result is a live run of the model or a saved demo. If it says prerecorded, I say so."
 
-Voice: "Case 2 is a synthetic coin, frontal image only. On the holdout I measured, frontal coins were called coin-like. Case 3 is stacked coins drawn to copy the ring. The app raises an ambiguity flag. That flag is not an order to operate, and a coin-like score is not permission to go home."
+Action: open `/scan?judge=1`. Wait for Case A. Point at the source badge, the battery-like label, the radial chart, and the Grad-CAM heat map.
 
-Action: press 2, then 3. Leave each result on screen long enough to read the label.
+Voice: "Case B is a single coin, called coin-like. Case C is stacked coins, which get flagged as battery-like or ambiguous. That flag is a research signal, not a treatment order, and a coin-like result does not mean a coin is present."
 
-## 1:28–1:55 — What the measurement actually found
+Action: run Case B, then Case C. Leave each result on screen long enough to read the label and the badge.
 
-Voice: "I do not claim clinical accuracy. On 40 synthetic images per class, the battery research flag was 40 out of 40, and a 95% interval for that rate still starts around 91%. Stacked coins were flagged 35 out of 40. When I attached a separate synthetic lateral, the network called every coin a battery. The classical branch still separated coins. The published 100% coin number does not survive that test. None of this was run on real patient X-rays."
+## 1:40–2:00 — How it works
 
-Picture: the evaluation page, the ablation chart. Do not show the old table that puts HaloScan next to Emory as if they were the same experiment.
+Voice: "Under the hood there are two branches. Classical image analysis in OpenCV measures brightness in rings outward from the disc. A small PyTorch network called DualViewNet looks at the front view and an optional side view. The site is Next.js and the model runs behind a FastAPI server."
 
-## 1:55–2:20 — Close
+Picture: the architecture page diagram.
 
-Voice: "The engineering is the radial measurement, the dual-view network, and an ensemble that can be wrong in a way I can show. Next I would train on a locked split, with real paired views, and I would not put this in front of a patient. If you think a child swallowed a battery, call emergency services or the National Battery Ingestion Hotline. Don't wait for an app."
+## 2:00–2:20 — Limits and close
+
+Voice: "These are results on drawn images, not medical accuracy. On a harder image generator only five of forty coins were recognized, and empty images usually come back coin-like. Next I would test on real paired views. [Student: say in one sentence which parts you wrote yourself and which AI tools you used. It must match the AI disclosure in SUBMISSION_FINAL.md.] If you think a child swallowed a battery, call emergency services or the National Battery Ingestion Hotline. Don't wait for an app."
+
+Picture: the evaluation page limitations box, then end on the scanner safety banner.
 
 On-screen text: "1-800-498-8666 · Not a diagnosis"
-
-End on the scanner safety banner.

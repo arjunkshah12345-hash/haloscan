@@ -36,7 +36,7 @@ Lateral  → step-off analyzer              ├→ ensemble → verdict + Grad-C
         <pre>{`ViewEncoder: ConvBlock 3→32, 32→64, 64→128, AdaptiveAvgPool → 128
 DualViewNet: AP encoder + lateral encoder, concat 256, Linear 256→128→3 classes
 Missing lateral: the lateral half of the vector is zeros
-Loss weights in classifier.py: [2.5, 1.4, 0.5] for battery, coin, normal
+Loss weights: [3.0, 1.0, 0.5] for battery, coin, normal (shipped checkpoint, trained 2026-08-21)
 Stacked coins are mapped to the battery class during training
 
 Ensemble in inference.py:

@@ -90,7 +90,7 @@ export default function MethodologyPage() {
       <ReadMore title="Training pipeline">
         <ul className="plain-list">
           <li>Generator: haloscan/synthetic.py — AP + lateral, four classes</li>
-          <li>Model: DualViewNet, CrossEntropyLoss weights [3.0, 1.0, 0.5]</li>
+          <li>Model: DualViewNet, CrossEntropyLoss weights [3.0, 1.0, 0.5] for battery, coin, normal (shipped checkpoint, trained 2026-08-21)</li>
           <li>Train: python3 scripts/train_cpu.py or Kaggle notebook (400 samples/class)</li>
           <li>Weights ship in weights/haloscan.pt</li>
         </ul>

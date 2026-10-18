@@ -27,12 +27,39 @@ export default function JudgesPage() {
           </p>
 
           <section>
-            <h2>30-second explanation</h2>
+            <h2>The problem</h2>
             <p>
-              Button batteries can injure a child&apos;s esophagus quickly. On imaging they can look like coins,
-              and stacked coins can copy the ring people associate with a battery. HaloScan studies that
-              ambiguity with two branches: OpenCV radial profiling and a small dual-view neural network, fused
-              into a research readout with Grad-CAM and a radial chart.
+              A swallowed button battery can burn through a child&apos;s esophagus in about two hours. On an X-ray it
+              can look almost exactly like a coin, which is usually far less urgent. Stacked coins can also copy the
+              &quot;double ring&quot; people look for on a battery. HaloScan studies that look-alike problem on
+              synthetic (computer-drawn) X-rays.
+            </p>
+          </section>
+
+          <section>
+            <h2>The one result to look at</h2>
+            <p>
+              Testing on 11 Oct showed that adding a second, side-view image made the neural network call every synthetic
+              coin a battery (0 of 40 coins recognized). The drawn side views were not true projections of the same
+              object, and the network had learned to follow rings. The fix is a guard: if the two-view network says
+              battery but the front-only network and classical image analysis both say coin, the app trusts the
+              front-only network. Re-run on 12 Oct with the guard, 40 of 40 coins were recognized again.
+            </p>
+            <p className="muted">
+              Limits: these are synthetic pattern-recognition results, not medical detection performance. On a
+              harder, shifted image generator only 5 of 40 coins were recognized. Stacked coins are usually called
+              battery-like or ambiguous, and empty images usually come back coin-like.{" "}
+              <Link href="/validation">Evaluation and limitations</Link>.
+            </p>
+          </section>
+
+          <section>
+            <h2>How it works, briefly</h2>
+            <p>
+              Two branches look at each image. Classical image analysis (OpenCV) measures brightness in rings
+              outward from the disc center (&quot;radial profiling&quot;). A small neural network,{" "}
+              <code>DualViewNet</code>, looks at the front view and an optional side view. The app combines the two
+              into a research readout and shows a Grad-CAM heat map of where the network looked.
             </p>
           </section>
 

@@ -46,7 +46,7 @@ The images are easy for a model in a way real radiographs are not: batteries are
 
 ## Algorithms and tools
 
-Python, PyTorch, OpenCV, NumPy, Pillow, Matplotlib, FastAPI, Next.js, TypeScript. Training used a weighted cross-entropy (`[2.5, 1.4, 0.5]` for battery, coin, normal). Stacked coins were mapped onto the battery class during training, so the network was not asked to learn a separate stack class. Fusion weights in the current ensemble are 0.48 classical, 0.42 network, and a small term on the network's coin score, plus 0.06 if a lateral step-off score is above 0.35.
+Python, PyTorch, OpenCV, NumPy, Pillow, Matplotlib, FastAPI, Next.js, TypeScript. Training used a weighted cross-entropy (`[3.0, 1.0, 0.5]` for battery, coin, normal, the configuration the shipped checkpoint was trained with). Stacked coins were mapped onto the battery class during training, so the network was not asked to learn a separate stack class. Fusion weights in the current ensemble are 0.48 classical, 0.42 network, and a small term on the network's coin score, plus 0.06 if a lateral step-off score is above 0.35.
 
 ## Testing and outcomes
 
