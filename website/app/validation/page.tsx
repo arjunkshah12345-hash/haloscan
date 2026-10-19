@@ -86,6 +86,36 @@ export default function ValidationPage() {
         collapse guard, so AP+lateral ensemble coin-pattern recovers to 40/40 on the 2026-10-12 holdout.
       </p>
 
+      <aside className="callout" role="note" aria-label="Limitations">
+        <h2>Read this first: limitations</h2>
+        <p>
+          Every number on this page measures synthetic pattern recognition on drawn images. None of it is medical
+          detection performance, and none of it was measured on real radiographs.
+        </p>
+        <ul>
+          <li>
+            <strong>Shifted generator, coins:</strong> when the image generator is changed (smaller frame, edge
+            placement, heavy JPEG, noise), only 5 of 40 synthetic coins (12.5%) are still recognized as coin-like.
+            The rest are called battery-like or ambiguous. Results do not transfer well to images that look
+            different from training.
+          </li>
+          <li>
+            <strong>Stacked coins:</strong> the confusion table shows stacked coins are usually labeled battery-like
+            or ambiguous, never &quot;stacked coins&quot;. Training merged stacks into the battery class, so the
+            app can only raise a flag on them, not recognize them.
+          </li>
+          <li>
+            <strong>Normal images:</strong> images with no object are almost always called coin-like (39 of 40 on
+            the holdout). A coin-like output does not mean a coin is present.
+          </li>
+          <li>
+            <strong>Battery flag 40/40:</strong> this shows the app flags ring patterns readily, including on many
+            non-batteries (on the shifted set, 52 coin or normal images were also flagged). It is not an
+            accuracy claim. The Wilson 95% interval for 40/40 starts near 91%.
+          </li>
+        </ul>
+      </aside>
+
       {!report ? (
         <p>
           The versioned report has not been generated yet. From the repository root:{" "}

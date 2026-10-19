@@ -28,6 +28,11 @@ const LABELS: Record<CaseId, string> = {
   normal: "Synthetic background",
 };
 
+const PATTERN: Record<string, string> = {
+  BATTERY: "Battery-like pattern",
+  COIN: "Coin-like pattern",
+};
+
 export default function GalleryPage() {
   const cases = loadManifest();
 
@@ -40,20 +45,33 @@ export default function GalleryPage() {
         <Link href="/scan">Open scanner</Link>
       </p>
 
+      <aside className="callout" role="note" aria-label="How to read these outputs">
+        <p>
+          <strong>HaloScan is a limited research classifier.</strong> It only chooses between battery-like and
+          coin-like patterns, so it has no reliable &quot;nothing here&quot; answer. The normal image below has no
+          object in it, yet the output is coin-like with a high coin score. That is a known limitation (39 of 40
+          normal holdout images were called coin-like). A coin-like output does not mean a coin is present, and a
+          battery-like output does not mean a battery is present. Scores are uncalibrated, not probabilities.
+        </p>
+      </aside>
+
       <table className="data">
         <thead>
           <tr>
             <th>Case</th>
-            <th>Output</th>
-            <th>Battery</th>
-            <th>Coin</th>
+            <th>Research output</th>
+            <th>Battery-like score</th>
+            <th>Coin-like score</th>
           </tr>
         </thead>
         <tbody>
           {cases.map((c) => (
             <tr key={c.id}>
               <td>{c.caption}</td>
-              <td>{c.prediction}</td>
+              <td>
+                {PATTERN[c.prediction] ?? c.prediction}
+                {c.id === "normal" ? " (no object present, see note)" : ""}
+              </td>
               <td>{(c.battery_probability * 100).toFixed(0)}%</td>
               <td>{(c.coin_probability * 100).toFixed(0)}%</td>
             </tr>

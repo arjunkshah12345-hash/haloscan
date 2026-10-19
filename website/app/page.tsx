@@ -38,8 +38,9 @@ export default function HomePage() {
               HaloScan
             </h1>
             <p className="hero-sub" data-reveal>
-              A research instrument for button-battery-like vs coin-like patterns on synthetic X-rays.
-              Classical radial profiling plus a dual-view network — labeled synthetic, not a diagnosis.
+              A swallowed button battery can burn through a child&apos;s esophagus in about two hours, and on an
+              X-ray it can look almost exactly like a coin. HaloScan is a student research prototype that studies
+              that look-alike problem on synthetic X-rays. It is not a diagnosis.
             </p>
             <div className="hero-actions" data-reveal>
               <Link href="/scan" className="btn btn--on-band">
@@ -56,11 +57,8 @@ export default function HomePage() {
                   <span className="product-window__dots" aria-hidden>
                     <i /><i /><i />
                   </span>
-                  <span>haloscan · live bench</span>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                    <span className="live-dot" aria-hidden />
-                    API ready
-                  </span>
+                  <span>haloscan · illustration</span>
+                  <span>Static preview · not a live result</span>
                 </div>
                 <div className="product-window__body">
                   <div className="product-film">
@@ -108,45 +106,84 @@ export default function HomePage() {
           <section className="chapter">
             <div className="chapter__inner">
               <div className="chapter__head" data-reveal>
-                <p className="eyebrow">Holdout · 11 Oct 2026</p>
+                <p className="eyebrow">The main result</p>
                 <h2 className="two-tone">
-                  What the measurement found. <span>Forty synthetic images per class. Not a clinical study.</span>
+                  A failure mode, found and guarded.{" "}
+                  <span>Synthetic images, 40 per class. Not a clinical study.</span>
                 </h2>
               </div>
-              <table className="holdout-table" data-reveal>
+              <ol className="pipe-flow" data-reveal aria-label="Failure found, guard added, result">
+                <li>
+                  <span className="pipe-flow__n">11 Oct</span>
+                  <strong>Failure found</strong>
+                  <span>
+                    When a second (side) view was added, the neural network called every synthetic coin a battery:
+                    0/40 coins recognized.
+                  </span>
+                </li>
+                <li>
+                  <span className="pipe-flow__n">Why</span>
+                  <strong>Cause</strong>
+                  <span>
+                    The network learned to follow rings, and the drawn side views were not real projections of the
+                    same object.
+                  </span>
+                </li>
+                <li>
+                  <span className="pipe-flow__n">12 Oct</span>
+                  <strong>Guard added</strong>
+                  <span>
+                    If the two-view network says battery but the front-only network and classical image analysis
+                    both say coin, the app trusts the front-only network.
+                  </span>
+                </li>
+                <li>
+                  <span className="pipe-flow__n">Result</span>
+                  <strong>40/40 coins recovered</strong>
+                  <span>Same 40 synthetic coins, re-run 12 Oct with the guard on.</span>
+                </li>
+              </ol>
+              <table className="holdout-table" data-reveal style={{ marginTop: "1.5rem" }}>
+                <caption className="t-small dim" style={{ captionSide: "bottom", textAlign: "left", paddingTop: "0.75rem" }}>
+                  Synthetic holdout, 40 images per class. Battery flag means the app raised a research flag. It is
+                  not detection accuracy on real patients.
+                </caption>
                 <thead>
                   <tr>
-                    <th>Setup</th>
+                    <th>Run</th>
                     <th>Battery flag</th>
                     <th>Coin-like</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Frontal image only</td>
-                    <td>40/40</td>
-                    <td>40/40</td>
-                  </tr>
-                  <tr>
-                    <td>Frontal + separate drawn lateral</td>
+                    <td>11 Oct · front + side view, no guard</td>
                     <td>40/40</td>
                     <td>0/40</td>
                   </tr>
                   <tr>
-                    <td>Classical CV only</td>
-                    <td>5/40</td>
+                    <td>12 Oct · front + side view, with guard</td>
                     <td>40/40</td>
+                    <td>40/40</td>
+                  </tr>
+                  <tr>
+                    <td>12 Oct · harder, shifted image generator</td>
+                    <td>40/40</td>
+                    <td>5/40</td>
                   </tr>
                 </tbody>
               </table>
-              <p className="dim" style={{ marginTop: "1.25rem", maxWidth: "40rem" }} data-reveal>
-                The network follows rings. A second synthetic view made it call every coin a battery. The classical
-                branch still separated coins. Wilson 95% for 40/40 starts near 91%.{" "}
+              <div className="callout" role="note">
+                <strong>Limits.</strong> These are pattern-recognition results on drawn images, not medical
+                detection performance. On the harder shifted generator, only 5 of 40 coins were recognized as coins.
+                Stacked coins are often called battery-like or ambiguous, and normal images with no object usually
+                come back coin-like. The 40/40 battery flag says the app flags ring patterns readily. It is not an
+                accuracy claim.{" "}
                 <Link className="link" href="/validation">
-                  Full report
+                  Full evaluation
                 </Link>
                 .
-              </p>
+              </div>
             </div>
           </section>
 
@@ -206,8 +243,8 @@ export default function HomePage() {
                 </li>
               </ol>
               <p className="dim" style={{ marginTop: "1.25rem" }} data-reveal>
-                DualViewNet alone still collapses synthetic coins when an independent lateral is attached.
-                The ensemble trusts AP-only CNN + classical when they agree on coin. Details in{" "}
+                The two-view network (DualViewNet) alone still fails on synthetic coins with a side view. The guard
+                described above is what keeps the combined readout from following it. Details in{" "}
                 <Link className="link" href="/architecture">
                   the model page
                 </Link>{" "}

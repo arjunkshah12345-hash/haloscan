@@ -613,6 +613,15 @@ export function ScanApp() {
               <p className="safety-inline">{r.protocol.safety || SAFETY}</p>
               {r.synthetic_label && <p className="synthetic-label">{r.synthetic_label}</p>}
 
+              {!r.ambiguous && researchLabel(r) === "COIN-LIKE PATTERN" && (
+                <p className="synthetic-label">
+                  {activeCase === "normal"
+                    ? "This image has no object in it. HaloScan is a limited research classifier that only chooses between battery-like and coin-like patterns, so empty images usually come back coin-like. "
+                    : "HaloScan is a limited research classifier. "}
+                  A coin-like output does not mean a coin is present, and it does not rule out a battery.
+                </p>
+              )}
+
               {r.ambiguous && (
                 <div className="emergency-strip">
                   Ambiguous radial pattern. This is a research flag, not a treatment order and not a reason to delay emergency care.

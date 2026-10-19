@@ -807,3 +807,35 @@ a {
     animation: none;
   }
 }
+
+/* Limitations / caveat box used on home, evaluation, and gallery */
+.callout {
+  margin: var(--s-5) 0;
+  padding: 1rem 1.15rem;
+  border-radius: 10px;
+  background: rgb(212 160 23 / 0.08);
+  box-shadow: inset 0 0 0 1px rgb(212 160 23 / 0.28);
+  color: var(--ink-2);
+  font-size: var(--ui);
+  max-width: 52rem;
+}
+
+.callout h2 {
+  margin: 0 0 var(--s-2);
+  font-size: var(--h3);
+  color: var(--ink);
+}
+
+.callout ul {
+  margin: var(--s-2) 0 0;
+  padding-left: 1.1rem;
+}
+
+.callout li + li {
+  margin-top: var(--s-2);
+}
+
+.callout strong,
+.callout a {
+  color: var(--ink);
+}

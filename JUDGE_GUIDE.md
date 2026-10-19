@@ -29,7 +29,7 @@ https://github.com/arjunkshah12345-hash/haloscan
 5. Ambiguity rules can mark an unresolved halo. They do not issue a treatment order.
 6. Grad-CAM and a radial chart are the explanations.
 
-Training mapped stacked coins onto the battery class. The loss weights are `[2.5, 1.4, 0.5]`.
+Training mapped stacked coins onto the battery class. The loss weights are `[3.0, 1.0, 0.5]` (battery, coin, normal), the configuration the shipped checkpoint was trained with.
 
 ## Reproducible evaluation
 

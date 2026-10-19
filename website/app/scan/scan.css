@@ -189,6 +189,12 @@
   }
 }
 
+@media (max-width: 600px) {
+  .case-rail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .case-tile {
   display: grid;
   grid-template-columns: 2rem 56px 1fr;

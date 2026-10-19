@@ -55,8 +55,9 @@ def train_models(
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     ap_x, lat_x, y = build_dataset(dual=True)
 
-    # Battery-weighted but not so aggressive that coin class collapses
-    weights = torch.tensor([2.5, 1.4, 0.5], device=device)
+    # Battery-weighted. These are the weights the shipped weights/haloscan.pt
+    # (sha256 56b923a6…) was trained with on 2026-08-21; keep them in sync if retraining.
+    weights = torch.tensor([3.0, 1.0, 0.5], device=device)
     criterion = nn.CrossEntropyLoss(weight=weights)
 
     # Single-view model
