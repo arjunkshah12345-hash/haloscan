@@ -177,7 +177,8 @@ export default function HomePage() {
                 <strong>Limits.</strong> These are pattern-recognition results on drawn images, not medical
                 detection performance. On the harder shifted generator, only 5 of 40 coins were recognized as coins.
                 Stacked coins are often called battery-like or ambiguous, and normal images with no object usually
-                come back coin-like. The 40/40 battery flag says the app flags ring patterns readily. It is not an
+                come back coin-like (39 of 40). Adding the side view gave no measurable improvement over the front
+                view alone. The 40/40 battery flag says the app flags ring patterns readily. It is not an
                 accuracy claim.{" "}
                 <Link className="link" href="/validation">
                   Full evaluation
@@ -224,7 +225,7 @@ export default function HomePage() {
                 <li>
                   <span className="pipe-flow__n">01</span>
                   <strong>Image in</strong>
-                  <span>AP required. Lateral optional — not assumed to help.</span>
+                  <span>Front view required. Side view optional; it showed no measurable benefit in testing.</span>
                 </li>
                 <li>
                   <span className="pipe-flow__n">02</span>

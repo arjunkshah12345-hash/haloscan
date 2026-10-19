@@ -44,6 +44,11 @@ Ensemble in inference.py:
   +0.06 if a lateral step-off score is above 0.35
 Ambiguity: halo > 0.42 and (no lateral or step-off < 0.38), plus stacked-mimic rules
 The ambiguity path is a research flag. It is not a clinical order.`}</pre>
+        <p className="muted">
+          Measured effect of the lateral view: none. On the synthetic holdout, AP-only and AP+lateral ablations give
+          identical rates (40/40 battery flags, 40/40 coin-like, 35/40 stacks flagged). DualViewNet is not shown to
+          be better than the AP-only path; see the <Link href="/validation">evaluation</Link>.
+        </p>
       </ReadMore>
 
       <ReadMore title="Deployment">

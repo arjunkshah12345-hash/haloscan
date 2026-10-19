@@ -60,7 +60,7 @@ That interpreter is the one on the development machine that has PyTorch 2.12 and
 
 ## Limitations and future work
 
-No real pediatric radiographs were evaluated. Scores are not calibrated probabilities. The generator and the training distribution are the same family, and training was not a locked seed, so this holdout is a fresh draw rather than a file of images withheld at training time. A useful 2.0 would lock the split, draw true projective pairs, keep stacked coins as their own class, and only then look for a licensed external image set.
+No real pediatric radiographs were evaluated. Scores are not calibrated probabilities. These are synthetic pattern-recognition results, not medical detection performance. On a shifted generator only 5 of 40 coins were recognized as coin-like, and on the holdout 39 of 40 empty (normal) images were called coin-like, so a coin-like output does not mean a coin is present. The lateral view showed no measurable benefit: AP-only and AP+lateral ablations give identical rates (40/40, 40/40, 35/40), so the dual-view model is not shown to be better than the front view alone. The generator and the training distribution are the same family, and training was not a locked seed, so this holdout is a fresh draw rather than a file of images withheld at training time. A useful 2.0 would lock the split, draw true projective pairs, keep stacked coins as their own class, and only then look for a licensed external image set.
 
 ## AI assistance disclosure
 
