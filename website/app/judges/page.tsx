@@ -161,6 +161,14 @@ fusion uses AP-only network scores.`}</pre>
               <li>No real pediatric radiographs were evaluated.</li>
               <li>Scores are uncalibrated — not diagnostic probabilities.</li>
               <li>AP and lateral in the generator are separate draws, not a true projective pair.</li>
+              <li>
+                The lateral view showed no measurable benefit: AP-only and AP+lateral ablations give identical
+                results. The dual-view model is not shown to be better than the front view alone.
+              </li>
+              <li>
+                Normal images with no object are called coin-like 39 of 40 times. On a shifted generator only 5 of
+                40 coins are recognized.
+              </li>
               <li>Not FDA cleared. Not for clinical decisions.</li>
             </ul>
           </section>

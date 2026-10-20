@@ -1,6 +1,6 @@
 # Release checklist
 
-Checked items were verified. Unchecked items were not. Updated 2026-10-11 for `release/cac-2026-final`.
+Checked items were verified. Unchecked items were not. Updated 2026-10-19 after Render 2.5.0 and the judge-feedback release.
 
 ## Product
 
@@ -10,9 +10,12 @@ Checked items were verified. Unchecked items were not. Updated 2026-10-11 for `r
 - [x] Reese's Law copy describes packaging and compartments, not a diagnostic claim, and does not repeat an unverified 409–2 vote as the authoritative story.
 - [x] Demo responses are labeled live or prerecorded (proxy + demo JSON).
 - [x] Bundled demo JSON protocols no longer contain CRITICAL/ROUTINE or the old 202-625-3333 hotline.
-- [x] Uploads are limited to 8 MB images and rejected when they are not images.
-- [ ] Student has clicked through the deployed production scanner after this branch is deployed.
-- [ ] Mobile layout checked in a real phone browser.
+- [x] Uploads are limited to 4 MB combined in the browser (Vercel rejects larger request bodies; the API itself allows 8 MB) and rejected when they are not images.
+- [x] Automated production click-through on 2026-10-19 (Playwright + Chrome, fresh contexts, desktop 1366px and iPhone 13 emulation, against haloscan-cac.vercel.app with Render 2.5.0): Cases A, B, C each returned **Live inference** with Grad-CAM and radial chart loaded; Case B used the dual-view path and stayed coin-like; no page errors; no horizontal overflow.
+- [x] Upload checks on production 2026-10-19: valid AP and AP+lateral uploads return live results; a corrupt file shows "Could not read that file as an image."; an oversized file is rejected before upload. With the API unreachable (preview build), every case is labeled **Prerecorded demo** and uploads show an error instead of a substituted result.
+- [x] Under concurrent load the free Render CPU can exceed the 50 s proxy timeout; cases then fall back to a result labeled **Prerecorded demo** (observed and correctly labeled 2026-10-19). Run cases one at a time when recording.
+- [ ] Student has clicked through the deployed production scanner by hand.
+- [ ] Mobile layout checked in a real phone browser (only emulation was tested).
 
 ## Science
 
@@ -37,7 +40,8 @@ Checked items were verified. Unchecked items were not. Updated 2026-10-11 for `r
 - [ ] Student records the video from the deployed app.
 - [ ] Student confirms eligibility, district, and team facts.
 - [ ] Student submits the form themselves. This repository does not submit it.
-- [x] Production Render API previously verified at 2.4.0; this branch bumps API to **2.5.0** (metrics never recompute online; dual-view collapse guard). Redeploy Render after merge.
+- [x] Production Render API redeployed to **2.5.0** on 2026-10-19 (manual deploy; the service's GitHub auto-deploy has never fired, so redeploy by hand after each API change). `/api/health` and `/api/metrics` return 200.
+- [x] Vercel production is a manual CLI deploy from `website/`; `haloscan-cac.vercel.app` is a manually set alias and must be re-pointed (`vercel alias set <deployment> haloscan-cac.vercel.app`) after each `vercel --prod`.
 - [x] Dual-view coin collapse reproduced and documented; ensemble guard + `cnn_only` ablation retained.
 
 ## Not claimed

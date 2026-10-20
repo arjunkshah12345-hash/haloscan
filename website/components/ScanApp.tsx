@@ -111,6 +111,8 @@ const PIPELINE_STEPS = [
 const SAFETY =
   "Suspected button-battery ingestion needs immediate professional emergency evaluation regardless of this prototype. HaloScan does not diagnose, rule out a battery, recommend discharge, or delay care.";
 
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+
 function researchLabel(r: Result): string {
   if (r.protocol?.research_label) return r.protocol.research_label;
   if (r.ambiguous || r.stacked_mimic) {
@@ -233,8 +235,8 @@ export function ScanApp() {
       notify("Upload a PNG, JPEG, or WebP image");
       return;
     }
-    if (file.size > 8 * 1024 * 1024) {
-      notify("Image must be 8 MB or smaller");
+    if (file.size > MAX_UPLOAD_BYTES) {
+      notify("Image must be 4 MB or smaller (JPEG or PNG).");
       return;
     }
     const url = URL.createObjectURL(file);
@@ -319,6 +321,11 @@ export function ScanApp() {
 
   const analyze = async () => {
     if (!apFile) return;
+    // Vercel rejects request bodies over ~4.5 MB before they reach the API
+    if (apFile.size + (latFile?.size ?? 0) > MAX_UPLOAD_BYTES) {
+      notify("Images are too large. Keep the AP and lateral under 4 MB combined (JPEG or PNG).");
+      return;
+    }
     setLoading(true);
     lastDemo.current = null;
     setActiveCase(null);
@@ -331,15 +338,20 @@ export function ScanApp() {
         const raw = await res.text();
         let detail = `Analysis failed (HTTP ${res.status}).`;
         try {
-          const body = JSON.parse(raw) as { error?: string; detail?: string };
-          detail = body.error || body.detail || detail;
+          const body = JSON.parse(raw) as { error?: unknown; detail?: unknown };
+          const msg = body.error ?? body.detail;
+          if (typeof msg === "string") detail = msg;
         } catch {
-          detail = raw.slice(0, 180) || detail;
+          // Non-JSON bodies are platform errors (e.g. Vercel 413); keep the generic message
         }
         throw new Error(
           res.status === 503
             ? "Inference API unavailable. Uploaded images are not analyzed with a prerecorded substitute."
-            : detail,
+            : res.status === 413
+              ? "Images are too large. Keep the AP and lateral under 4 MB combined (JPEG or PNG)."
+              : res.status === 429
+                ? "Too many analyses in a minute. Wait a moment and try again."
+                : detail,
         );
       }
       const data = (await res.json()) as Result;
@@ -520,7 +532,7 @@ export function ScanApp() {
         <section className="bench-panel">
           <h2>Upload your own</h2>
           <p className="bench-lead">
-            AP required. Lateral optional — fused when present, not assumed to help. Needs a live API; no silent demo substitute.
+            AP required. Lateral optional — fused when present; it showed no measurable benefit in testing. Needs a live API; no silent demo substitute.
           </p>
 
           <label
@@ -781,7 +793,7 @@ export function ScanApp() {
         </section>
       </div>
 
-      {toast && <div className="scan-toast">{toast}</div>}
+      {toast && <div className="scan-toast" role="status" aria-live="polite">{toast}</div>}
 
       {showHelp && (
         <div className="help-overlay" onClick={() => setShowHelp(false)} role="presentation">

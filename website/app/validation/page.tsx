@@ -109,6 +109,13 @@ export default function ValidationPage() {
             the holdout). A coin-like output does not mean a coin is present.
           </li>
           <li>
+            <strong>The side view adds no measurable benefit:</strong> in the ablations below, front view only and
+            front + side view give identical results (40/40 battery flags, 40/40 coin-like, 35/40 stacks flagged).
+            On these synthetic images the dual-view network is not shown to be better than the front view alone;
+            the side view mainly created the failure the guard now blocks. Synthetic side views are separate
+            drawings, not real projections, so this does not test what a true second X-ray view could add.
+          </li>
+          <li>
             <strong>Battery flag 40/40:</strong> this shows the app flags ring patterns readily, including on many
             non-batteries (on the shifted set, 52 coin or normal images were also flagged). It is not an
             accuracy claim. The Wilson 95% interval for 40/40 starts near 91%.
