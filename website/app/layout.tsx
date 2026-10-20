@@ -1,29 +1,29 @@
 import type { Metadata } from "next";
-import { Instrument_Sans, JetBrains_Mono } from "next/font/google";
+import { Geist_Mono, Host_Grotesk } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 
-const sans = Instrument_Sans({
+const sans = Host_Grotesk({
   subsets: ["latin"],
-  variable: "--font-instrument",
+  variable: "--font-host",
   display: "swap",
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
 });
 
-const mono = JetBrains_Mono({
+const mono = Geist_Mono({
   subsets: ["latin"],
-  variable: "--font-jetbrains",
+  variable: "--font-geist-mono",
   display: "swap",
   weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
-  title: "HaloScan — research scanner for synthetic disc patterns",
+  title: "HaloScan — button battery vs coin, studied on synthetic X-rays",
   description:
-    "Student research prototype: classical radial profiling plus a dual-view network on synthetic X-ray-style images. Not a medical device. Congressional App Challenge 2026.",
+    "Student research prototype for the 2026 Congressional App Challenge. Classical radial profiling plus a small neural network on synthetic X-ray images. Not a medical device.",
   openGraph: {
     title: "HaloScan",
-    description: "Experimental research prototype. Not a diagnosis and not a medical device.",
+    description: "Student research prototype. Not a diagnosis and not a medical device.",
     type: "website",
     url: "https://haloscan-cac.vercel.app",
   },
@@ -31,26 +31,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable}`} data-theme="dark">
+    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add('js')` }} />
-        <style>{`
-          :root {
-            --font-display: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
-            --font-text: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
-            --font-mono: var(--font-jetbrains), ui-monospace, monospace;
-          }
-        `}</style>
       </head>
       <body>
         <a className="skip" href="#main">
           Skip to content
         </a>
+        <div className="rails" aria-hidden />
         {children}
-        <Script id="studio-motion" type="module" strategy="afterInteractive">
-          {`import { autoInit } from '/studio/motion.js'; autoInit();`}
-        </Script>
+        <Script src="/dither.js" strategy="afterInteractive" />
       </body>
     </html>
   );

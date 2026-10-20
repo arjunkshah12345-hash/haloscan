@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { ScanApp } from "@/components/ScanApp";
+import { SiteFooter } from "@/components/SiteFooter";
 import "./scan.css";
 
 export const metadata = {
@@ -18,8 +19,11 @@ function ScanFallback() {
 
 export default function ScanPage() {
   return (
-    <Suspense fallback={<ScanFallback />}>
-      <ScanApp />
-    </Suspense>
+    <>
+      <Suspense fallback={<ScanFallback />}>
+        <ScanApp />
+      </Suspense>
+      <SiteFooter />
+    </>
   );
 }

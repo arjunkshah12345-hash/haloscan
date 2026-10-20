@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteNav } from "@/components/SiteNav";
+import { DocShell } from "@/components/DocShell";
 
 export const metadata = {
   title: "Judges — HaloScan",
@@ -9,11 +8,8 @@ export const metadata = {
 
 export default function JudgesPage() {
   return (
-    <>
-      <SiteNav current="judges" />
-      <main id="main" className="doc-page">
-        <div className="doc-page__inner">
-          <p className="eyebrow">Congressional App Challenge 2026</p>
+    <DocShell current="judges">
+          <span className="lab">Congressional App Challenge 2026</span>
           <h1>Judge guide</h1>
           <p className="lede">
             HaloScan is a student research prototype that measures battery-like and coin-like patterns on
@@ -21,8 +17,8 @@ export default function JudgesPage() {
             emergency care regardless of this app.
           </p>
           <p>
-            <Link className="btn btn--accent" href="/scan?judge=1">
-              Explore the Demo <span className="arr" aria-hidden>→</span>
+            <Link className="btn" href="/scan?judge=1">
+              Run the judge walkthrough →
             </Link>
           </p>
 
@@ -188,9 +184,6 @@ fusion uses AP-only network scores.`}</pre>
               <li>Battery hotline: 1-800-498-8666 · Poison Help: 1-800-222-1222</li>
             </ul>
           </section>
-        </div>
-      </main>
-      <SiteFooter />
-    </>
+    </DocShell>
   );
 }

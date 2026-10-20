@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { HaloMark } from "./HaloMark";
+import { SiteNav } from "./SiteNav";
 
 type Halo = {
   halo_score: number;
@@ -433,22 +433,7 @@ export function ScanApp() {
 
   return (
     <div className="scan-root">
-      <header className="scan-top">
-        <Link href="/" className="scan-top__brand">
-          <HaloMark />
-          HaloScan
-        </Link>
-        <div className="scan-top__meta">
-          <span className="status-chip">
-            <span className={`live-dot${apiLive ? "" : " live-dot--off"}`} aria-hidden />
-            {apiWarming ? "Checking API" : apiLive === null ? "…" : apiLive ? "Live API" : "API offline"}
-          </span>
-          <Link href="/judges">Judges</Link>
-          <button type="button" className="link-btn" onClick={() => setShowHelp(true)} aria-label="Keyboard shortcuts">
-            Shortcuts
-          </button>
-        </div>
-      </header>
+      <SiteNav current="scan" />
 
       <p className="scan-safety" role="note">
         {SAFETY} Hotline <a href="tel:18004988666">1-800-498-8666</a>. Poison Help{" "}
@@ -463,7 +448,7 @@ export function ScanApp() {
 
       <section className="demo-intro">
         <div className="demo-intro__copy">
-          <p className="eyebrow">Interactive demonstration</p>
+          <span className="lab">Interactive demonstration</span>
           <h1>Pick a reference case</h1>
           <p>
             Three synthetic films for judges. Click a card — no keyboard required. Optional shortcuts:{" "}
@@ -471,11 +456,18 @@ export function ScanApp() {
           </p>
         </div>
         <div className="demo-intro__actions">
-          <button type="button" className="btn btn--accent" onClick={runJudgeDemo} disabled={loading || apiWarming}>
+          <span className="status-chip" role="status">
+            <span className={`live-dot${apiLive ? "" : " live-dot--off"}`} aria-hidden />
+            {apiWarming ? "Checking API" : apiLive === null ? "…" : apiLive ? "Live API" : "API offline"}
+          </span>
+          <button type="button" className="btn" onClick={runJudgeDemo} disabled={loading || apiWarming}>
             Run A → B → C walkthrough
           </button>
           <button type="button" className="btn btn--ghost" onClick={resetBench} disabled={loading}>
             Reset bench
+          </button>
+          <button type="button" className="btn btn--ghost" onClick={() => setShowHelp(true)} aria-label="Keyboard shortcuts">
+            Shortcuts
           </button>
         </div>
       </section>
@@ -567,7 +559,7 @@ export function ScanApp() {
             {!latPreview ? (
               <>
                 <strong>Lateral (optional)</strong>
-                <span className="dropzone-hint">A second view is fused, not assumed to help</span>
+                <span className="dropzone-hint">Optional · showed no measurable benefit in testing</span>
               </>
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
