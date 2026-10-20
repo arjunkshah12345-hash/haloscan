@@ -465,3 +465,135 @@
   color: var(--ink-3);
   font-size: var(--small);
 }
+
+/* ---------- analyze feedback ---------- */
+
+.btn-analyze {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-analyze > span {
+  position: relative;
+}
+
+.btn-analyze.is-empty {
+  opacity: 0.6;
+}
+
+/* Busy: dark button that fills with light as progress advances */
+.btn-analyze.is-busy {
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--line2);
+  cursor: progress;
+}
+
+.btn-analyze.is-busy::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--p, 0%);
+  background: repeating-linear-gradient(90deg, var(--line2) 0 2px, transparent 2px 4px);
+  transition: width 200ms linear;
+}
+
+.analyze-progress {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 0.85rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--accent);
+  background: var(--bg);
+  font-size: var(--small);
+  color: var(--text2);
+}
+
+.analyze-progress__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--text);
+}
+
+.analyze-progress__time {
+  font: 500 12px / 1.4 var(--font-mono);
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.analyze-progress__track {
+  height: 4px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.analyze-progress__fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 200ms linear;
+}
+
+.scan-loading .analyze-progress {
+  max-width: 28rem;
+  margin-top: 0;
+}
+
+.dropzone--nudge {
+  box-shadow: inset 0 0 0 1px var(--accent);
+  animation: nudge 0.5s var(--ease) 2;
+}
+
+@keyframes nudge {
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dropzone--nudge {
+    animation: none;
+  }
+
+  .btn-analyze.is-busy::before,
+  .analyze-progress__fill {
+    transition: none;
+  }
+}
+
+.ring-loader {
+  width: 48px;
+  height: 48px;
+  color: var(--text2);
+  animation: ring-spin 1.4s linear infinite;
+}
+
+@keyframes ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring-loader {
+    animation: none;
+  }
+}
+
+.ring-loader circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.ring-loader circle:first-of-type {
+  stroke-dasharray: 6 4;
+  opacity: 1;
+}
+
+.ring-loader .core {
+  fill: var(--accent);
+  stroke: none;
+}

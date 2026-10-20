@@ -59,13 +59,17 @@ const SAMPLES: { id: SampleId; title: string; file: string; side?: string }[] = 
   { id: "empty", title: "No object", file: "/samples/synthetic-empty.png" },
 ];
 
-const PIPELINE_STEPS = [
-  "Uploading image",
-  "CLAHE contrast + disc localization",
-  "Radial halo profiling (OpenCV)",
-  "Neural network forward pass (PyTorch)",
-  "Ensemble fusion + Grad-CAM",
+// Server-side stages, keyed to rough elapsed seconds. The server does not
+// stream progress, so this is an estimate shown alongside a real timer.
+const PIPELINE_STEPS: { at: number; label: string }[] = [
+  { at: 0, label: "Uploading image to the analysis server" },
+  { at: 1.5, label: "Enhancing contrast and locating the disc" },
+  { at: 3, label: "Radial halo profiling (OpenCV)" },
+  { at: 5, label: "Neural network forward pass (PyTorch)" },
+  { at: 8, label: "Fusing scores and rendering Grad-CAM" },
 ];
+const TYPICAL_SECONDS = 12;
+const MAX_ATTEMPTS = 3;
 
 const SAFETY =
   "Suspected button-battery ingestion needs immediate professional emergency evaluation regardless of this prototype. HaloScan does not diagnose, rule out a battery, recommend discharge, or delay care.";
@@ -112,7 +116,9 @@ export function ScanApp() {
   const [result, setResult] = useState<Result | null>(null);
   const [resultPreview, setResultPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [loadStep, setLoadStep] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
+  const [attempt, setAttempt] = useState(1);
+  const [nudgeUpload, setNudgeUpload] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [apiLive, setApiLive] = useState<boolean | null>(null);
   const resultsRef = useRef<HTMLElement>(null);
@@ -124,18 +130,11 @@ export function ScanApp() {
   }, []);
 
   useEffect(() => {
-    let step = 0;
-    let timer: ReturnType<typeof setInterval> | null = null;
-    if (loading) {
-      setLoadStep(0);
-      timer = setInterval(() => {
-        step = Math.min(step + 1, PIPELINE_STEPS.length - 1);
-        setLoadStep(step);
-      }, 900);
-    }
-    return () => {
-      if (timer) clearInterval(timer);
-    };
+    if (!loading) return;
+    const start = performance.now();
+    setElapsed(0);
+    const timer = setInterval(() => setElapsed((performance.now() - start) / 1000), 200);
+    return () => clearInterval(timer);
   }, [loading]);
 
   // The free API host sleeps when idle. Poll health until it is awake so the
@@ -226,18 +225,33 @@ export function ScanApp() {
   }, [sampleParam, loadSample]);
 
   const analyze = async () => {
-    if (!apFile) return;
+    if (loading) return;
+    if (!apFile) {
+      notify("Add a front-view image first: drop one in, or click a sample below.");
+      setNudgeUpload(true);
+      setTimeout(() => setNudgeUpload(false), 1600);
+      return;
+    }
     // Vercel rejects request bodies over ~4.5 MB before they reach the API
     if (apFile.size + (latFile?.size ?? 0) > MAX_UPLOAD_BYTES) {
       notify("Images are too large. Keep the front and side views under 4 MB combined (JPEG or PNG).");
       return;
     }
     setLoading(true);
+    setResult(null);
+    setAttempt(1);
     const form = new FormData();
     form.append("ap", apFile);
     if (latFile) form.append("lateral", latFile);
     try {
-      const res = await fetch("/api/analyze", { method: "POST", body: form });
+      // A sleeping server answers 503/504 through the proxy; retry instead of failing.
+      let res = await fetch("/api/analyze", { method: "POST", body: form });
+      for (let n = 2; n <= MAX_ATTEMPTS && (res.status === 503 || res.status === 504); n++) {
+        setAttempt(n);
+        setApiLive(false);
+        await new Promise((r) => setTimeout(r, 3000));
+        res = await fetch("/api/analyze", { method: "POST", body: form });
+      }
       if (!res.ok) {
         const raw = await res.text();
         let detail = `Analysis failed (HTTP ${res.status}).`;
@@ -250,7 +264,7 @@ export function ScanApp() {
         }
         throw new Error(
           res.status === 503 || res.status === 504
-            ? "The analysis server is waking up. Wait a few seconds and press Analyze again."
+            ? "The analysis server did not respond after several tries. Wait a minute and press Analyze again."
             : res.status === 413
               ? "Images are too large. Keep the front and side views under 4 MB combined (JPEG or PNG)."
               : res.status === 429
@@ -295,6 +309,28 @@ export function ScanApp() {
     }
   };
 
+  const step = [...PIPELINE_STEPS].reverse().find((x) => elapsed >= x.at) ?? PIPELINE_STEPS[0];
+  // Eases toward 95% around the typical runtime; never claims completion early.
+  const progress = loading ? Math.min(95, 95 * (1 - Math.exp(-elapsed / (TYPICAL_SECONDS / 2.2)))) : 0;
+  const progressNote =
+    attempt > 1
+      ? `The analysis server was asleep and is waking up. Retrying automatically (attempt ${attempt} of ${MAX_ATTEMPTS}).`
+      : elapsed > 20
+        ? "Taking longer than usual. The free server may be waking up, which can take up to a minute. Keep this tab open."
+        : `Usually ${TYPICAL_SECONDS - 2}–${TYPICAL_SECONDS + 3} seconds on the server.`;
+  const progressBlock = (
+    <div className="analyze-progress" role="status" aria-live="polite">
+      <div className="analyze-progress__head">
+        <span>{step.label}…</span>
+        <span className="analyze-progress__time">{elapsed.toFixed(0)} s</span>
+      </div>
+      <div className="analyze-progress__track" aria-hidden>
+        <div className="analyze-progress__fill" style={{ width: `${progress}%` }} />
+      </div>
+      <p>{progressNote}</p>
+    </div>
+  );
+
   const r = result;
   const verdictClass = !r
     ? "routine"
@@ -336,7 +372,7 @@ export function ScanApp() {
           <h2>Input</h2>
 
           <label
-            className="dropzone"
+            className={`dropzone${nudgeUpload ? " dropzone--nudge" : ""}`}
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => {
               e.preventDefault();
@@ -376,13 +412,20 @@ export function ScanApp() {
           </label>
 
           <div className="analyze-row">
-            <button className="btn-analyze" disabled={!apFile || loading} onClick={analyze}>
-              {loading ? "Analyzing…" : "Analyze"}
+            <button
+              className={`btn-analyze${loading ? " is-busy" : ""}${!apFile ? " is-empty" : ""}`}
+              onClick={analyze}
+              aria-busy={loading}
+              style={loading ? ({ "--p": `${progress}%` } as React.CSSProperties) : undefined}
+            >
+              <span>{loading ? `Analyzing… ${elapsed.toFixed(0)} s` : "Analyze"}</span>
             </button>
             <button type="button" className="btn btn--ghost" onClick={clearInputs} disabled={loading || (!apFile && !r)}>
               Clear
             </button>
           </div>
+
+          {loading && progressBlock}
 
           <div className="samples">
             <span className="lab">Synthetic samples · computer-drawn, not patient images</span>
@@ -408,7 +451,7 @@ export function ScanApp() {
           {loading ? (
             <div className="scan-loading">
               <HaloMark className="halo-mark ring-loader" />
-              <p>{PIPELINE_STEPS[loadStep] || "Working…"}</p>
+              {progressBlock}
             </div>
           ) : !r ? (
             <div className="results-empty">
