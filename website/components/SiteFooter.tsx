@@ -20,7 +20,7 @@ export function SiteFooter() {
           <div className="site-footer__col">
             <span className="lab">Use</span>
             <Link href="/scan">Scanner</Link>
-            <Link href="/scan?judge=1">Judge walkthrough</Link>
+            <Link href="/judges">Judge guide</Link>
             <Link href="/gallery">Gallery</Link>
           </div>
           <div className="site-footer__col">

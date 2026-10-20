@@ -36,7 +36,7 @@ const CASES = [
     id: "coin",
     key: "B",
     title: "Single coin",
-    caption: "Flat disc with a side view. The guard keeps it coin-like.",
+    caption: "Flat, even disc. Comes back coin-like.",
     src: "/figures/coin/ap.png",
   },
   {
@@ -281,12 +281,12 @@ export default function HomePage() {
                 <span className="lab">04 · Try it</span>
                 <div>
                   <h2 id="cases-title">Three synthetic cases.</h2>
-                  <p className="lede">Each runs the live model. A badge says whether a result is live or prerecorded.</p>
+                  <p className="lede">Open one in the scanner, or upload your own image, and run the live engine.</p>
                 </div>
               </div>
               <div className="cases">
                 {CASES.map((c) => (
-                  <Link key={c.id} href={`/scan?case=${c.id}`} className="case">
+                  <Link key={c.id} href={`/scan?sample=${c.id}`} className="case">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={c.src} alt="" loading="lazy" />
                     <span className="case__cap">
@@ -334,8 +334,8 @@ export default function HomePage() {
                 <h2 id="cta-title">Run it, then read the code.</h2>
               </div>
               <div className="btn-row">
-                <Link href="/scan?judge=1" className="btn">
-                  Judge walkthrough →
+                <Link href="/scan" className="btn">
+                  Open the scanner →
                 </Link>
                 <a href={REPO_URL} className="btn btn--ghost" target="_blank" rel="noopener noreferrer">
                   GitHub

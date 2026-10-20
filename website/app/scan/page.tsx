@@ -6,7 +6,7 @@ import "./scan.css";
 export const metadata = {
   title: "HaloScan — Research Scanner",
   description:
-    "Experimental PyTorch + OpenCV ensemble on synthetic X-ray-style images. Press 1 for battery, 3 for stacked coins. Not a medical device.",
+    "Upload an X-ray-style image and run the live PyTorch + OpenCV engine. Synthetic samples included. Not a medical device.",
 };
 
 function ScanFallback() {
