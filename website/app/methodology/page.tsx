@@ -19,7 +19,7 @@ export default function MethodologyPage() {
   const report = loadReport();
 
   return (
-    <DocShell>
+    <DocShell current="methodology">
 
       <h1>Methodology</h1>
       <p className="lede">

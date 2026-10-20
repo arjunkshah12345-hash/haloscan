@@ -30,13 +30,9 @@ Picture: the home page "main result" section: the 11 Oct → 12 Oct steps and th
 
 ## 1:00–1:40 — Show the scanner live
 
-Voice: "Now the live app. Case A is a synthetic battery. This badge says whether the result is a live run of the model or a saved demo. If it says prerecorded, I say so."
+Action: open `/scan`. Wait for the status chip to read "Engine online" (open the page a couple of minutes early; the free server sleeps when idle). Click the "Button battery" sample (or drag in `synthetic-battery.png`), press Analyze, and point at the label, the classical / network / combined scores, the radial intensity profile, and the Grad-CAM heatmap.
 
-Action: open `/scan?judge=1`. Wait for Case A. Point at the source badge, the battery-like label, the radial chart, and the Grad-CAM heat map.
-
-Voice: "Case B is a single coin, called coin-like. Case C is stacked coins, which get flagged as battery-like or ambiguous. That flag is a research signal, not a treatment order, and a coin-like result does not mean a coin is present."
-
-Action: run Case B, then Case C. Leave each result on screen long enough to read the label and the badge.
+Then repeat with "Single coin" and "Stacked coins". Live results on these samples as of 2026-10-19: battery → "AMBIGUOUS — BATTERY-LIKE PATTERN" (classical 73%, network 90%, combined 67% battery-like); coin → "COIN-LIKE PATTERN" (combined 12%); stacked coins → "BATTERY-LIKE PATTERN" with a research flag (combined 55%). Leave each result on screen long enough to read.
 
 ## 1:40–2:00 — How it works
 

@@ -10,7 +10,7 @@ Suspected button-battery ingestion needs professional emergency evaluation regar
 
 - App: https://haloscan-cac.vercel.app
 - Scanner: https://haloscan-cac.vercel.app/scan
-- Judge path: https://haloscan-cac.vercel.app/scan?judge=1
+- Judge path: https://haloscan-cac.vercel.app/scan
 - Model page: https://haloscan-cac.vercel.app/architecture
 - Evaluation page: https://haloscan-cac.vercel.app/validation
 

@@ -34,7 +34,7 @@ export default function UseCasesPage() {
       <h1>Synthetic examples</h1>
       <p className="lede">Four drawn cases mapped to scanner keys 1–4. They are not patient histories.</p>
       <p>
-        <Link href="/scan?judge=1">Run judge demo (Cases 1 + 3)</Link>
+        <Link href="/scan">Open the scanner</Link>
       </p>
 
       {CASES.map((c) => (

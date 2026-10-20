@@ -1,19 +1,15 @@
 import Link from "next/link";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteNav } from "@/components/SiteNav";
+import { DocShell } from "@/components/DocShell";
 
 export const metadata = {
   title: "Judges — HaloScan",
-  description: "Congressional App Challenge judge path for HaloScan: demo walkthrough, architecture, and honest synthetic metrics.",
+  description: "Congressional App Challenge judge path for HaloScan: live scanner, architecture, and honest synthetic metrics.",
 };
 
 export default function JudgesPage() {
   return (
-    <>
-      <SiteNav current="judges" />
-      <main id="main" className="doc-page">
-        <div className="doc-page__inner">
-          <p className="eyebrow">Congressional App Challenge 2026</p>
+    <DocShell current="judges">
+          <span className="lab">Congressional App Challenge 2026</span>
           <h1>Judge guide</h1>
           <p className="lede">
             HaloScan is a student research prototype that measures battery-like and coin-like patterns on
@@ -21,8 +17,8 @@ export default function JudgesPage() {
             emergency care regardless of this app.
           </p>
           <p>
-            <Link className="btn btn--accent" href="/scan?judge=1">
-              Explore the Demo <span className="arr" aria-hidden>→</span>
+            <Link className="btn" href="/scan">
+              Open the scanner →
             </Link>
           </p>
 
@@ -64,31 +60,26 @@ export default function JudgesPage() {
           </section>
 
           <section>
-            <h2>Live demonstration (about 90 seconds)</h2>
+            <h2>Try it (about 90 seconds)</h2>
             <ol>
               <li>
-                Open <Link href="/scan?judge=1">the scanner</Link>. Click{" "}
-                <strong>Run A → B → C walkthrough</strong>, or tap the cards.
+                Open <Link href="/scan">the scanner</Link>. Upload a front-view image, or click a synthetic sample
+                to load it into the uploader, then press <strong>Analyze</strong>. Every result is a live run of
+                the engine.
               </li>
               <li>
-                <strong>Case A — battery-like:</strong> drawn double halo. Check the source badge (
-                <em>Live inference</em> vs <em>Prerecorded demo</em>), classical vs network scores, radial
-                chart, and Grad-CAM.
+                <strong>Button battery:</strong> drawn double ring. Compare the classical and network scores, the
+                radial intensity profile, and the Grad-CAM heatmap.
               </li>
               <li>
-                <strong>Case B — single coin:</strong> flat disc. Earlier dual-view runs collapsed coins to
-                battery when a lateral was attached; the current ensemble guards that failure when AP-only CNN
-                and classical profiling agree on coin.
+                <strong>Single coin:</strong> flat disc, called coin-like. A coin-like output does not prove a
+                coin is present.
               </li>
               <li>
-                <strong>Case C — stacked coins:</strong> multi-ring mimic. Ambiguity is a research flag, not a
-                treatment order.
+                <strong>Stacked coins:</strong> copied rings that mimic a battery. They are flagged, not
+                recognized as stacks. A flag is a research signal, not a treatment order.
               </li>
             </ol>
-            <p>
-              Keyboard shortcuts <kbd>1</kbd>–<kbd>4</kbd> remain optional. Uploads require a live API and are
-              never silently replaced with a prerecorded result.
-            </p>
           </section>
 
           <section>
@@ -188,9 +179,6 @@ fusion uses AP-only network scores.`}</pre>
               <li>Battery hotline: 1-800-498-8666 · Poison Help: 1-800-222-1222</li>
             </ul>
           </section>
-        </div>
-      </main>
-      <SiteFooter />
-    </>
+    </DocShell>
   );
 }

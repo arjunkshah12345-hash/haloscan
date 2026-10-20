@@ -294,7 +294,7 @@ export default function ValidationPage() {
         <code>docs/eval/eval_report.json</code> and the chart on this page.
       </p>
       <p>
-        <Link href="/scan?judge=1">Open the judge demo</Link>
+        <Link href="/scan">Open the scanner</Link>
       </p>
     </DocShell>
   );
